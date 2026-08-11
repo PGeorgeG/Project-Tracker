@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= project.name %></title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div>
+        <a href="/" style="font-size:13px;">&larr; All projects</a>
+        <h1 style="margin-top:4px;"><%= project.name %></h1>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <form method="POST" action="/projects/<%= project.id %>/archive">
+          <button type="submit" class="btn btn-small"><%= project.archived ? 'Unarchive' : 'Archive' %></button>
+        </form>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="proj-header">
+        <h2 style="font-size:15px;">Overview</h2>
+        <span class="proj-lead">Lead: <%= project.lead_name %></span>
+      </div>
+      <p class="proj-outcome"><%= project.outcome %></p>
+      <div class="meta-row">
+        <% if (project.status_tag) { %><span class="badge badge-<%= project.status_tag.replace(' ', '-') %>"><%= project.status_tag %></span><% } %>
+        <% if (project.cadence) { %><span class="badge badge-count"><%= project.cadence %> check-ins</span><% } %>
+        <span class="badge badge-count"><%= project.start_date %> &rarr; <%= project.end_date %></span>
+      </div>
+
+      <details style="margin-top:1rem;">
+        <summary style="font-size:13px; color:var(--text-secondary); cursor:pointer;">Edit project details</summary>
+        <form method="POST" action="/projects/<%= project.id %>/edit" style="margin-top:1rem;">
+          <div class="form-group">
+            <label>Project name</label>
+            <input type="text" name="name" value="<%= project.name %>" required>
+          </div>
+          <div class="form-group">
+            <label>Outcome / goal</label>
+            <textarea name="outcome" required><%= project.outcome %></textarea>
+          </div>
+          <div class="form-group">
+            <label>Project lead</label>
+            <input type="text" name="lead_name" value="<%= project.lead_name %>" required>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Start date</label>
+              <input type="date" name="start_date" value="<%= project.start_date %>" required>
+            </div>
+            <div class="form-group">
+              <label>End date</label>
+              <input type="date" name="end_date" value="<%= project.end_date %>" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Status</label>
+              <select name="status_tag">
+                <option value="">Not set</option>
+                <% STATUS_TAGS.forEach(function(t) { %>
+                  <option value="<%= t %>" <%= project.status_tag === t ? 'selected' : '' %>><%= t %></option>
+                <% }); %>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Meeting cadence</label>
+              <select name="cadence">
+                <option value="">Not set</option>
+                <% CADENCES.forEach(function(c) { %>
+                  <option value="<%= c %>" <%= project.cadence === c ? 'selected' : '' %>><%= c %></option>
+                <% }); %>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Dashboard color</label>
+            <input type="color" name="color" value="<%= project.color %>" style="width:60px; height:36px; padding:2px;">
+          </div>
+          <button type="submit" class="btn btn-primary btn-small">Save changes</button>
+        </form>
+      </details>
+    </div>
+
+    <div class="card">
+      <div class="legend">
+        <span><span class="legend-dot"></span>Stage</span>
+        <span><span class="legend-diamond tone-red"></span>Chokepoint</span>
+        <span><span class="legend-diamond tone-amber"></span>Warning</span>
+        <span><span class="legend-diamond tone-green"></span>All good</span>
+      </div>
+      <p class="muted" style="font-size:12px; margin:0 0 0.5rem;">Click the timeline to open the full meeting log below.</p>
+
+      <% if (stages.length > 0) { %>
+        <div data-interactive="true" data-timeline='<%- JSON.stringify({
+          start: project.start_date,
+          end: project.end_date,
+          stages: stages,
+          notes: notes,
+          progressPct: (function() {
+            const done = stages.filter(s => s.status === "done").length;
+            return stages.length ? Math.round((done / stages.length) * 100) : 0;
+          })()
+        }) %>' style="margin-bottom:2rem;"></div>
+      <% } else { %>
+        <p class="empty-state">No stages yet. Add the key stages from the lead's plan below to see the timeline.</p>
+      <% } %>
+
+      <div id="logSection" class="log-section" style="display:none;">
+        <p class="section-title">Meeting log</p>
+        <% if (notes.length === 0) { %>
+          <p class="empty-state">No meeting notes yet.</p>
+        <% } %>
+        <% notes.slice().reverse().forEach(function(n) { %>
+          <div class="log-row">
+            <span class="log-date"><%= n.meeting_date %></span>
+            <span class="log-text"><%= n.text %></span>
+            <span class="log-pin <%= n.posted_on_timeline ? 'on' : 'off' %>" style="<%= n.posted_on_timeline ? 'color:var(--' + n.tone + ')' : '' %>">
+              <%= n.posted_on_timeline ? '●' : '○' %>
+            </span>
+            <span class="log-actions">
+              <form method="POST" action="/projects/<%= project.id %>/notes/<%= n.id %>/delete" onsubmit="return confirm('Delete this note?');">
+                <button type="submit" class="btn btn-small">Delete</button>
+              </form>
+            </span>
+          </div>
+        <% }); %>
+
+        <div style="margin-top:14px; padding-top:14px; border-top:1px dashed var(--border);">
+          <p class="section-title">New note</p>
+          <form method="POST" action="/projects/<%= project.id %>/notes">
+            <div class="form-group">
+              <label>Meeting date</label>
+              <input type="date" name="meeting_date" required value="<%= new Date().toISOString().slice(0,10) %>">
+            </div>
+            <div class="form-group">
+              <label>What happened</label>
+              <textarea name="text" required placeholder="Notes from this meeting"></textarea>
+            </div>
+            <div class="checkbox-row">
+              <input type="checkbox" id="postToggle" name="posted_on_timeline" value="1">
+              <label for="postToggle" style="margin:0;">Post on timeline</label>
+            </div>
+            <div class="tone-row" id="toneRow">
+              <label style="color:var(--red);"><input type="radio" name="tone" value="red"> Chokepoint</label>
+              <label style="color:var(--amber);"><input type="radio" name="tone" value="amber"> Warning</label>
+              <label style="color:var(--green);"><input type="radio" name="tone" value="green" checked> All good</label>
+            </div>
+            <button type="submit" class="btn btn-primary btn-small">Save note</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <p class="section-title">Key stages</p>
+        <% if (stages.length === 0) { %>
+          <p class="empty-state">No stages yet.</p>
+        <% } %>
+        <% stages.forEach(function(s) { %>
+          <div class="stage-row">
+            <span class="dot dot-<%= s.status %>"></span>
+            <span class="grow"><%= s.label %> <span class="muted">— <%= s.target_date %></span></span>
+            <form method="POST" action="/projects/<%= project.id %>/stages/<%= s.id %>/delete" onsubmit="return confirm('Delete this stage?');">
+              <button type="submit" class="btn btn-small">Delete</button>
+            </form>
+          </div>
+        <% }); %>
+
+        <form method="POST" action="/projects/<%= project.id %>/stages" style="margin-top:1rem;">
+          <div class="form-group">
+            <label>Stage label</label>
+            <input type="text" name="label" required placeholder="e.g. Curriculum draft">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Target date</label>
+              <input type="date" name="target_date" required>
+            </div>
+            <div class="form-group">
+              <label>Status</label>
+              <select name="status">
+                <% STAGE_STATUSES.forEach(function(st) { %>
+                  <option value="<%= st %>"><%= st %></option>
+                <% }); %>
+              </select>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-small">Add stage</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <p class="section-title">Todos</p>
+        <% if (todos.length === 0) { %>
+          <p class="empty-state">No todos yet.</p>
+        <% } %>
+        <% todos.forEach(function(t) { %>
+          <div class="todo-row">
+            <form method="POST" action="/projects/<%= project.id %>/todos/<%= t.id %>/toggle">
+              <button type="submit" class="btn btn-small"><%= t.done ? '↺' : '✓' %></button>
+            </form>
+            <span class="grow" style="<%= t.done ? 'text-decoration:line-through; color:var(--text-muted);' : '' %>"><%= t.text %></span>
+            <% if (t.due_date) { %><span class="muted"><%= t.due_date %></span><% } %>
+            <form method="POST" action="/projects/<%= project.id %>/todos/<%= t.id %>/delete">
+              <button type="submit" class="btn btn-small">Delete</button>
+            </form>
+          </div>
+        <% }); %>
+
+        <form method="POST" action="/projects/<%= project.id %>/todos" style="margin-top:1rem;">
+          <div class="form-group">
+            <label>New todo</label>
+            <input type="text" name="text" required placeholder="What needs doing">
+          </div>
+          <div class="form-group">
+            <label>Due date (optional)</label>
+            <input type="date" name="due_date">
+          </div>
+          <button type="submit" class="btn btn-small">Add todo</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="card">
+      <p class="section-title">Alerts</p>
+      <% if (alerts.length === 0) { %>
+        <p class="empty-state">No open alerts.</p>
+      <% } %>
+      <% alerts.forEach(function(a) { %>
+        <div class="alert-row">
+          <span class="grow"><%= a.note %></span>
+          <span class="muted"><%= a.trigger_date %></span>
+          <form method="POST" action="/projects/<%= project.id %>/alerts/<%= a.id %>/dismiss">
+            <button type="submit" class="btn btn-small">Dismiss</button>
+          </form>
+        </div>
+      <% }); %>
+
+      <form method="POST" action="/projects/<%= project.id %>/alerts" style="margin-top:1rem;">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Alert note</label>
+            <input type="text" name="note" required placeholder="What to watch for">
+          </div>
+          <div class="form-group">
+            <label>Trigger date</label>
+            <input type="date" name="trigger_date" required>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-small">Add alert</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/timeline.js"></script>
+</body>
+</html>

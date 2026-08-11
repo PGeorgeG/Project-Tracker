@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project tracker</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <h1>Project tracker</h1>
+      <div style="display:flex; gap:8px;">
+        <a class="btn" href="/?archived=<%= showArchived ? '0' : '1' %>"><%= showArchived ? 'Show active' : 'Show archived' %></a>
+        <a class="btn btn-primary" href="/projects/new">New project</a>
+      </div>
+    </div>
+
+    <% if (projects.length === 0) { %>
+      <div class="card">
+        <p class="empty-state">
+          <% if (showArchived) { %>No archived projects.<% } else { %>No active projects yet. Create your first one to get started.<% } %>
+        </p>
+      </div>
+    <% } %>
+
+    <% projects.forEach(function(p) { %>
+      <a class="card card-link" href="/projects/<%= p.id %>">
+        <div class="proj-header">
+          <h2><%= p.name %></h2>
+          <span class="proj-lead">Lead: <%= p.lead_name %></span>
+        </div>
+        <p class="proj-outcome"><%= p.outcome %></p>
+        <div class="meta-row">
+          <% if (p.status_tag) { %>
+            <span class="badge badge-<%= p.status_tag.replace(' ', '-') %>"><%= p.status_tag %></span>
+          <% } %>
+          <% if (p.cadence) { %><span class="badge badge-count"><%= p.cadence %> check-ins</span><% } %>
+          <% if (p.openAlerts > 0) { %><span class="badge badge-at-risk"><%= p.openAlerts %> alert<%= p.openAlerts > 1 ? 's' : '' %></span><% } %>
+          <% if (p.openTodos > 0) { %><span class="badge badge-count"><%= p.openTodos %> open todo<%= p.openTodos > 1 ? 's' : '' %></span><% } %>
+        </div>
+        <% if (p.stages.length > 0) { %>
+          <div data-interactive="false" data-timeline='<%- JSON.stringify({
+            start: p.start_date,
+            end: p.end_date,
+            stages: p.stages,
+            notes: [],
+            progressPct: (function() {
+              const done = p.stages.filter(s => s.status === "done").length;
+              return p.stages.length ? Math.round((done / p.stages.length) * 100) : 0;
+            })()
+          }) %>'></div>
+        <% } else { %>
+          <p class="empty-state">No stages added yet.</p>
+        <% } %>
+      </a>
+    <% }); %>
+  </div>
+  <script src="/js/timeline.js"></script>
+</body>
+</html>
