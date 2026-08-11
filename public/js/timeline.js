@@ -39,12 +39,17 @@ function fmtDate(dateStr) {
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
+const STOPWORDS = new Set([
+  'a', 'an', 'the', 'of', 'to', 'for', 'and', 'or', 'in', 'on', 'with',
+  'by', 'at', 'as', 'from', 'into', 'that', 'this', 'is', 'are', 'be',
+  'being', 'been', 'it', 'its', 'their', 'our', 'your'
+]);
+
 function abbreviate(label) {
-  return label
-    .split(/\s+/)
-    .filter(Boolean)
-    .map(w => w.slice(0, 3))
-    .join(' ');
+  const words = label.split(/\s+/).filter(Boolean);
+  const content = words.filter(w => !STOPWORDS.has(w.toLowerCase()));
+  const chosen = (content.length ? content : words).slice(0, 2);
+  return chosen.map(w => (w.length > 7 ? w.slice(0, 7) : w)).join(' ');
 }
 
 function renderTimeline(container) {
