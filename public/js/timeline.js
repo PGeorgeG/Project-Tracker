@@ -39,6 +39,14 @@ function fmtDate(dateStr) {
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
+function abbreviate(label) {
+  return label
+    .split(/\s+/)
+    .filter(Boolean)
+    .map(w => w.slice(0, 3))
+    .join(' ');
+}
+
 function renderTimeline(container) {
   const data = JSON.parse(container.dataset.timeline);
   const interactive = container.dataset.interactive === 'true';
@@ -71,6 +79,13 @@ function renderTimeline(container) {
       label.className = 'stage-label';
       label.style.left = pct + '%';
       label.innerHTML = s.label + '<b>' + fmtDate(s.target_date) + '</b>';
+      wrap.appendChild(label);
+    } else {
+      const label = document.createElement('div');
+      label.className = 'stage-label stage-label-mini';
+      label.style.left = pct + '%';
+      label.textContent = abbreviate(s.label);
+      label.title = s.label + ' — ' + fmtDate(s.target_date);
       wrap.appendChild(label);
     }
   });
