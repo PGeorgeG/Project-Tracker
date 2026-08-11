@@ -214,6 +214,14 @@ textarea { min-height: 70px; resize: vertical; }
 .stage-row, .todo-row, .alert-row {
   display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px;
 }
+.stage-row-wrap:last-child .stage-row { border-bottom: 1px solid var(--border); }
+.stage-edit-toggle { position: relative; }
+.stage-edit-toggle summary { list-style: none; cursor: pointer; }
+.stage-edit-toggle summary::-webkit-details-marker { display: none; }
+.stage-edit-form {
+  margin: 8px 0 12px; padding: 12px; background: var(--bg);
+  border: 1px solid var(--border); border-radius: var(--radius);
+}
 .stage-row .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 .dot-done, .dot-current { background: var(--accent); }
 .dot-pending { background: var(--border-strong); }
