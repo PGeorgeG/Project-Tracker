@@ -88,6 +88,11 @@ a:hover { text-decoration: underline; }
 .proj-header h2 { font-size: 16px; font-weight: 600; margin: 0; }
 .proj-lead { font-size: 13px; color: var(--text-secondary); }
 .proj-outcome { font-size: 13px; color: var(--text-secondary); margin: 4px 0 1rem; }
+.proj-outcome p { margin: 0 0 8px; }
+.proj-outcome p:last-child { margin-bottom: 0; }
+.proj-outcome ul { margin: 0 0 8px; padding-left: 18px; }
+.proj-outcome ul:last-child { margin-bottom: 0; }
+.proj-outcome li { margin-bottom: 2px; }
 
 .badge {
   display: inline-block;

@@ -8,6 +8,53 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+// Renders freeform outcome text: lines starting with "- " or "* " become
+// bullet points, blank lines separate paragraphs, single newlines become <br>.
+function renderOutcome(text) {
+  if (!text) return '';
+  const lines = String(text).split(/\r?\n/);
+  let html = '';
+  let inList = false;
+  let paragraphLines = [];
+
+  function flushParagraph() {
+    if (paragraphLines.length) {
+      html += '<p>' + paragraphLines.join('<br>') + '</p>';
+      paragraphLines = [];
+    }
+  }
+  function closeList() {
+    if (inList) { html += '</ul>'; inList = false; }
+  }
+
+  lines.forEach(line => {
+    const trimmed = line.trim();
+    if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+      flushParagraph();
+      if (!inList) { html += '<ul>'; inList = true; }
+      html += '<li>' + escapeHtml(trimmed.slice(2)) + '</li>';
+    } else if (trimmed === '') {
+      closeList();
+      flushParagraph();
+    } else {
+      closeList();
+      paragraphLines.push(escapeHtml(line));
+    }
+  });
+  closeList();
+  flushParagraph();
+  return html;
+}
+
+app.locals.renderOutcome = renderOutcome;
+
 const STATUS_TAGS = ['on track', 'at risk', 'stalled'];
 const CADENCES = ['weekly', 'biweekly', 'monthly', 'ad hoc'];
 const STAGE_STATUSES = ['pending', 'current', 'done', 'blocked'];

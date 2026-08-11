@@ -30,7 +30,7 @@
           <h2><%= p.name %></h2>
           <span class="proj-lead">Lead: <%= p.lead_name %></span>
         </div>
-        <p class="proj-outcome"><%= p.outcome %></p>
+        <div class="proj-outcome"><%- renderOutcome(p.outcome) %></div>
         <div class="meta-row">
           <% if (p.status_tag) { %>
             <span class="badge badge-<%= p.status_tag.replace(' ', '-') %>"><%= p.status_tag %></span>

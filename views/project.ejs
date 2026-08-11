@@ -25,7 +25,7 @@
         <h2 style="font-size:15px;">Overview</h2>
         <span class="proj-lead">Lead: <%= project.lead_name %></span>
       </div>
-      <p class="proj-outcome"><%= project.outcome %></p>
+      <div class="proj-outcome"><%- renderOutcome(project.outcome) %></div>
       <div class="meta-row">
         <% if (project.status_tag) { %><span class="badge badge-<%= project.status_tag.replace(' ', '-') %>"><%= project.status_tag %></span><% } %>
         <% if (project.cadence) { %><span class="badge badge-count"><%= project.cadence %> check-ins</span><% } %>
@@ -40,7 +40,7 @@
             <input type="text" name="name" value="<%= project.name %>" required>
           </div>
           <div class="form-group">
-            <label>Outcome / goal</label>
+            <label>Outcome / goal <span class="muted" style="font-weight:400;">— start a line with - for a bullet point</span></label>
             <textarea name="outcome" required><%= project.outcome %></textarea>
           </div>
           <div class="form-group">
