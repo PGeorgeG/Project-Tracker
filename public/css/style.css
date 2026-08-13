@@ -76,8 +76,29 @@ a:hover { text-decoration: underline; }
 .card-link {
   display: block;
   color: inherit;
+  cursor: pointer;
 }
 .card-link:hover { text-decoration: none; border-color: var(--border-strong); }
+
+.tile-links {
+  margin-top: 1rem;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+.tile-links-title {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin: 0 0 6px;
+}
+.tile-links a {
+  display: block;
+  font-size: 13px;
+  color: var(--accent);
+  margin-bottom: 3px;
+}
+.tile-links a:last-child { margin-bottom: 0; }
 
 .proj-header {
   display: flex;
