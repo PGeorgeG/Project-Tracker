@@ -53,7 +53,9 @@ function abbreviate(label) {
 }
 
 function renderTimeline(container) {
-  const data = JSON.parse(container.dataset.timeline);
+  const scriptEl = container.querySelector('script.timeline-json');
+  if (!scriptEl) return;
+  const data = JSON.parse(scriptEl.textContent);
   const interactive = container.dataset.interactive === 'true';
   const { start, end, stages, notes, progressPct } = data;
 
@@ -147,7 +149,13 @@ function renderTimeline(container) {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-  document.querySelectorAll('[data-timeline]').forEach(renderTimeline);
+  document.querySelectorAll('.timeline-mount').forEach(function (el) {
+    try {
+      renderTimeline(el);
+    } catch (e) {
+      console.error('Timeline failed to render', e);
+    }
+  });
 
   const postToggle = document.getElementById('postToggle');
   if (postToggle) {
