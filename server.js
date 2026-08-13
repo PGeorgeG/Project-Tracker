@@ -106,9 +106,10 @@ app.get('/projects/:id', (req, res) => {
   const notes = db.prepare('SELECT * FROM notes WHERE project_id = ? ORDER BY meeting_date ASC').all(project.id);
   const todos = db.prepare('SELECT * FROM todos WHERE project_id = ? ORDER BY done ASC, due_date ASC').all(project.id);
   const alerts = db.prepare('SELECT * FROM alerts WHERE project_id = ? AND dismissed = 0 ORDER BY trigger_date ASC').all(project.id);
+  const links = db.prepare('SELECT * FROM links WHERE project_id = ? ORDER BY created_at ASC').all(project.id);
 
   res.render('project', {
-    project, stages, notes, todos, alerts,
+    project, stages, notes, todos, alerts, links,
     STATUS_TAGS, CADENCES, STAGE_STATUSES, TONES
   });
 });
@@ -189,6 +190,34 @@ app.post('/projects/:id/alerts', (req, res) => {
 
 app.post('/projects/:id/alerts/:alertId/dismiss', (req, res) => {
   db.prepare('UPDATE alerts SET dismissed = 1 WHERE id=? AND project_id=?').run(req.params.alertId, req.params.id);
+  res.redirect('/projects/' + req.params.id);
+});
+
+// ---------- Links ----------
+function guessDescriptionFromUrl(url) {
+  try {
+    const u = new URL(url);
+    const segments = u.pathname.split('/').filter(Boolean);
+    const last = segments[segments.length - 1];
+    if (last) return decodeURIComponent(last);
+    return u.hostname;
+  } catch (e) {
+    return url;
+  }
+}
+
+app.post('/projects/:id/links', (req, res) => {
+  let { description, url } = req.body;
+  if (!url) return res.redirect('/projects/' + req.params.id);
+  if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+  if (!description || !description.trim()) description = guessDescriptionFromUrl(url);
+  db.prepare('INSERT INTO links (project_id, description, url) VALUES (?, ?, ?)')
+    .run(req.params.id, description.trim(), url);
+  res.redirect('/projects/' + req.params.id);
+});
+
+app.post('/projects/:id/links/:linkId/delete', (req, res) => {
+  db.prepare('DELETE FROM links WHERE id=? AND project_id=?').run(req.params.linkId, req.params.id);
   res.redirect('/projects/' + req.params.id);
 });
 
