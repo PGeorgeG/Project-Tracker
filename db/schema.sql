@@ -49,3 +49,11 @@ CREATE TABLE IF NOT EXISTS alerts (
   dismissed INTEGER DEFAULT 0,
   created_at TEXT DEFAULT (datetime('now'))
 );
+
+CREATE TABLE IF NOT EXISTS links (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  project_id INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  description TEXT NOT NULL,
+  url TEXT NOT NULL,
+  created_at TEXT DEFAULT (datetime('now'))
+);
