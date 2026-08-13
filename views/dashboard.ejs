@@ -25,7 +25,7 @@
     <% } %>
 
     <% projects.forEach(function(p) { %>
-      <a class="card card-link" href="/projects/<%= p.id %>">
+      <div class="card card-link" onclick="if(!event.target.closest('a')) window.location='/projects/<%= p.id %>'">
         <div class="proj-header">
           <h2><%= p.name %></h2>
           <span class="proj-lead">Lead: <%= p.lead_name %></span>
@@ -53,7 +53,16 @@
         <% } else { %>
           <p class="empty-state">No stages added yet.</p>
         <% } %>
-      </a>
+
+        <% if (p.links.length > 0) { %>
+          <div class="tile-links">
+            <p class="tile-links-title">Related links</p>
+            <% p.links.forEach(function(l) { %>
+              <a href="<%= l.url %>" target="_blank" rel="noopener noreferrer"><%= l.description %></a>
+            <% }); %>
+          </div>
+        <% } %>
+      </div>
     <% }); %>
   </div>
   <script src="/js/timeline.js"></script>
