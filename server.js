@@ -55,6 +55,18 @@ function renderOutcome(text) {
 
 app.locals.renderOutcome = renderOutcome;
 
+// Safely embeds JSON inside a <script type="application/json"> block by
+// escaping characters that could prematurely close the tag or be
+// misinterpreted by the HTML parser. Avoids the class of bugs caused by
+// apostrophes/quotes in user text breaking a quoted HTML attribute.
+function safeJson(obj) {
+  return JSON.stringify(obj)
+    .replace(/</g, '\\u003c')
+    .replace(/>/g, '\\u003e')
+    .replace(/&/g, '\\u0026');
+}
+app.locals.safeJson = safeJson;
+
 const STATUS_TAGS = ['on track', 'at risk', 'stalled'];
 const CADENCES = ['weekly', 'biweekly', 'monthly', 'ad hoc'];
 const STAGE_STATUSES = ['pending', 'current', 'done', 'blocked'];
