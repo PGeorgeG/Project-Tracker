@@ -96,16 +96,18 @@
       <p class="muted" style="font-size:12px; margin:0 0 0.5rem;">Click the timeline to open the full meeting log below.</p>
 
       <% if (stages.length > 0) { %>
-        <div data-interactive="true" data-timeline='<%- JSON.stringify({
-          start: project.start_date,
-          end: project.end_date,
-          stages: stages,
-          notes: notes,
-          progressPct: (function() {
-            const done = stages.filter(s => s.status === "done").length;
-            return stages.length ? Math.round((done / stages.length) * 100) : 0;
-          })()
-        }) %>' style="margin-bottom:2rem;"></div>
+        <div class="timeline-mount" data-interactive="true" style="margin-bottom:2rem;">
+          <script type="application/json" class="timeline-json"><%- safeJson({
+            start: project.start_date,
+            end: project.end_date,
+            stages: stages,
+            notes: notes,
+            progressPct: (function() {
+              const done = stages.filter(s => s.status === "done").length;
+              return stages.length ? Math.round((done / stages.length) * 100) : 0;
+            })()
+          }) %></script>
+        </div>
       <% } else { %>
         <p class="empty-state">No stages yet. Add the key stages from the lead's plan below to see the timeline.</p>
       <% } %>
