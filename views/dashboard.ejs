@@ -25,7 +25,7 @@
     <% } %>
 
     <% projects.forEach(function(p) { %>
-      <div class="card card-link" onclick="if(!event.target.closest('a')) window.location='/projects/<%= p.id %>'">
+      <div class="card card-link" onclick="if(!event.target.closest('a, form, button, input, label')) window.location='/projects/<%= p.id %>'">
         <div class="proj-header">
           <h2><%= p.name %></h2>
           <span class="proj-lead">Lead: <%= p.lead_name %></span>
@@ -37,7 +37,7 @@
           <% } %>
           <% if (p.cadence) { %><span class="badge badge-count"><%= p.cadence %> check-ins</span><% } %>
           <% if (p.openAlerts > 0) { %><span class="badge badge-at-risk"><%= p.openAlerts %> alert<%= p.openAlerts > 1 ? 's' : '' %></span><% } %>
-          <% if (p.openTodos > 0) { %><span class="badge badge-count"><%= p.openTodos %> open todo<%= p.openTodos > 1 ? 's' : '' %></span><% } %>
+          <% if (p.openTodos.length > 0) { %><span class="badge badge-count"><%= p.openTodos.length %> open todo<%= p.openTodos.length > 1 ? 's' : '' %></span><% } %>
         </div>
         <% if (p.stages.length > 0) { %>
           <div class="timeline-mount" data-interactive="false">
@@ -54,6 +54,20 @@
           </div>
         <% } else { %>
           <p class="empty-state">No stages added yet.</p>
+        <% } %>
+
+        <% if (p.openTodos.length > 0) { %>
+          <div class="tile-todos">
+            <p class="tile-links-title">Todos</p>
+            <% p.openTodos.forEach(function(t) { %>
+              <form method="POST" action="/projects/<%= p.id %>/todos/<%= t.id %>/toggle" class="tile-todo-row">
+                <label>
+                  <input type="checkbox" onchange="this.form.submit()">
+                  <span><%= t.text %><% if (t.due_date) { %> <span class="muted">— <%= t.due_date %></span><% } %></span>
+                </label>
+              </form>
+            <% }); %>
+          </div>
         <% } %>
 
         <% if (p.links.length > 0) { %>
