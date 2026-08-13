@@ -40,16 +40,18 @@
           <% if (p.openTodos > 0) { %><span class="badge badge-count"><%= p.openTodos %> open todo<%= p.openTodos > 1 ? 's' : '' %></span><% } %>
         </div>
         <% if (p.stages.length > 0) { %>
-          <div data-interactive="false" data-timeline='<%- JSON.stringify({
-            start: p.start_date,
-            end: p.end_date,
-            stages: p.stages,
-            notes: [],
-            progressPct: (function() {
-              const done = p.stages.filter(s => s.status === "done").length;
-              return p.stages.length ? Math.round((done / p.stages.length) * 100) : 0;
-            })()
-          }) %>'></div>
+          <div class="timeline-mount" data-interactive="false">
+            <script type="application/json" class="timeline-json"><%- safeJson({
+              start: p.start_date,
+              end: p.end_date,
+              stages: p.stages,
+              notes: [],
+              progressPct: (function() {
+                const done = p.stages.filter(s => s.status === "done").length;
+                return p.stages.length ? Math.round((done / p.stages.length) * 100) : 0;
+              })()
+            }) %></script>
+          </div>
         <% } else { %>
           <p class="empty-state">No stages added yet.</p>
         <% } %>
