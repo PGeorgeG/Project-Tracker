@@ -282,6 +282,34 @@
         <button type="submit" class="btn btn-small">Add alert</button>
       </form>
     </div>
+    <div class="card">
+      <p class="section-title">Related links</p>
+      <% if (links.length === 0) { %>
+        <p class="empty-state">No links added yet.</p>
+      <% } %>
+      <% links.forEach(function(l) { %>
+        <div class="link-row">
+          <a class="grow" href="<%= l.url %>" target="_blank" rel="noopener noreferrer"><%= l.description %></a>
+          <form method="POST" action="/projects/<%= project.id %>/links/<%= l.id %>/delete">
+            <button type="submit" class="btn btn-small">Delete</button>
+          </form>
+        </div>
+      <% }); %>
+
+      <form method="POST" action="/projects/<%= project.id %>/links" style="margin-top:1rem;">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Description <span class="muted" style="font-weight:400;">— leave blank to use the filename</span></label>
+            <input type="text" name="description" placeholder="e.g. Curriculum draft v3.docx">
+          </div>
+          <div class="form-group">
+            <label>Link</label>
+            <input type="text" name="url" required placeholder="https://drive.google.com/...">
+          </div>
+        </div>
+        <button type="submit" class="btn btn-small">Add link</button>
+      </form>
+    </div>
   </div>
 
   <script src="/js/timeline.js"></script>
