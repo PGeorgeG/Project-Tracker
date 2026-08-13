@@ -211,9 +211,10 @@ textarea { min-height: 70px; resize: vertical; }
 
 .section-title { font-size: 13px; color: var(--text-muted); margin: 0 0 10px; text-transform: uppercase; letter-spacing: 0.03em; }
 
-.stage-row, .todo-row, .alert-row {
+.stage-row, .todo-row, .alert-row, .link-row {
   display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px;
 }
+.link-row a { color: var(--accent); }
 .stage-row-wrap:last-child .stage-row { border-bottom: 1px solid var(--border); }
 .stage-edit-toggle { position: relative; }
 .stage-edit-toggle summary { list-style: none; cursor: pointer; }
