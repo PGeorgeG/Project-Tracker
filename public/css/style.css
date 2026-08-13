@@ -80,6 +80,29 @@ a:hover { text-decoration: underline; }
 }
 .card-link:hover { text-decoration: none; border-color: var(--border-strong); }
 
+.tile-todos {
+  margin-top: 1rem;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+.tile-todo-row { margin-bottom: 4px; }
+.tile-todo-row:last-child { margin-bottom: 0; }
+.tile-todo-row label {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.tile-todo-row input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  margin-top: 1px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
 .tile-links {
   margin-top: 1rem;
   padding-top: 10px;
