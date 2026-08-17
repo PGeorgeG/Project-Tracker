@@ -24,10 +24,22 @@
       </div>
     <% } %>
 
-    <% projects.forEach(function(p) { %>
+    <% projects.forEach(function(p, idx) { %>
       <div class="card card-link" onclick="if(!event.target.closest('a, form, button, input, label')) window.location='/projects/<%= p.id %>'">
         <div class="proj-header">
-          <h2><%= p.name %></h2>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <div class="move-buttons">
+              <form method="POST" action="/projects/<%= p.id %>/move">
+                <input type="hidden" name="direction" value="up">
+                <button type="submit" class="btn btn-small" <%= idx === 0 ? 'disabled' : '' %> title="Move up">&uarr;</button>
+              </form>
+              <form method="POST" action="/projects/<%= p.id %>/move">
+                <input type="hidden" name="direction" value="down">
+                <button type="submit" class="btn btn-small" <%= idx === projects.length - 1 ? 'disabled' : '' %> title="Move down">&darr;</button>
+              </form>
+            </div>
+            <h2><%= p.name %></h2>
+          </div>
           <span class="proj-lead">Lead: <%= p.lead_name %></span>
         </div>
         <div class="proj-outcome"><%- renderOutcome(p.outcome) %></div>
