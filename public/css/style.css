@@ -103,6 +103,11 @@ a:hover { text-decoration: underline; }
   cursor: pointer;
 }
 
+.tile-todo-row label.todo-overdue,
+.tile-todo-row label.todo-overdue .muted { color: var(--red); }
+.tile-todo-row label.todo-soon,
+.tile-todo-row label.todo-soon .muted { color: var(--amber); }
+
 .tile-links {
   margin-top: 1rem;
   padding-top: 10px;
