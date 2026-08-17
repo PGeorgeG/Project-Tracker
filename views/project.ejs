@@ -118,17 +118,42 @@
           <p class="empty-state">No meeting notes yet.</p>
         <% } %>
         <% notes.slice().reverse().forEach(function(n) { %>
-          <div class="log-row">
-            <span class="log-date"><%= n.meeting_date %></span>
-            <span class="log-text"><%= n.text %></span>
-            <span class="log-pin <%= n.posted_on_timeline ? 'on' : 'off' %>" style="<%= n.posted_on_timeline ? 'color:var(--' + n.tone + ')' : '' %>">
-              <%= n.posted_on_timeline ? '●' : '○' %>
-            </span>
-            <span class="log-actions">
-              <form method="POST" action="/projects/<%= project.id %>/notes/<%= n.id %>/delete" onsubmit="return confirm('Delete this note?');">
-                <button type="submit" class="btn btn-small">Delete</button>
-              </form>
-            </span>
+          <div class="log-row-wrap">
+            <div class="log-row">
+              <span class="log-date"><%= n.meeting_date %></span>
+              <span class="log-text"><%= n.text %></span>
+              <span class="log-pin <%= n.posted_on_timeline ? 'on' : 'off' %>" style="<%= n.posted_on_timeline ? 'color:var(--' + n.tone + ')' : '' %>">
+                <%= n.posted_on_timeline ? '●' : '○' %>
+              </span>
+              <span class="log-actions">
+                <details class="stage-edit-toggle">
+                  <summary class="btn btn-small">Edit</summary>
+                  <form method="POST" action="/projects/<%= project.id %>/notes/<%= n.id %>/edit" class="stage-edit-form note-edit-form">
+                    <div class="form-group">
+                      <label>Meeting date</label>
+                      <input type="date" name="meeting_date" value="<%= n.meeting_date %>" required>
+                    </div>
+                    <div class="form-group">
+                      <label>What happened</label>
+                      <textarea name="text" required><%= n.text %></textarea>
+                    </div>
+                    <div class="checkbox-row">
+                      <input type="checkbox" name="posted_on_timeline" value="1" id="postToggle-<%= n.id %>" <%= n.posted_on_timeline ? 'checked' : '' %> onchange="document.getElementById('toneRow-<%= n.id %>').style.display = this.checked ? 'flex' : 'none';">
+                      <label for="postToggle-<%= n.id %>" style="margin:0;">Post on timeline</label>
+                    </div>
+                    <div class="tone-row" id="toneRow-<%= n.id %>" style="display:<%= n.posted_on_timeline ? 'flex' : 'none' %>;">
+                      <label style="color:var(--red);"><input type="radio" name="tone" value="red" <%= n.tone === 'red' ? 'checked' : '' %>> Chokepoint</label>
+                      <label style="color:var(--amber);"><input type="radio" name="tone" value="amber" <%= n.tone === 'amber' ? 'checked' : '' %>> Warning</label>
+                      <label style="color:var(--green);"><input type="radio" name="tone" value="green" <%= (n.tone === 'green' || !n.tone) ? 'checked' : '' %>> All good</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-small">Save note</button>
+                  </form>
+                </details>
+                <form method="POST" action="/projects/<%= project.id %>/notes/<%= n.id %>/delete" onsubmit="return confirm('Delete this note?');">
+                  <button type="submit" class="btn btn-small">Delete</button>
+                </form>
+              </span>
+            </div>
           </div>
         <% }); %>
 
