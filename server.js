@@ -94,7 +94,7 @@ function getProject(id) {
 app.get('/', (req, res) => {
   const showArchived = req.query.archived === '1';
   const projects = db.prepare(
-    `SELECT * FROM projects WHERE archived = ? ORDER BY created_at DESC`
+    `SELECT * FROM projects WHERE archived = ? ORDER BY sort_order ASC, created_at ASC`
   ).all(showArchived ? 1 : 0);
 
   const projectData = projects.map(p => {
@@ -118,9 +118,11 @@ app.post('/projects', (req, res) => {
   if (!name || !outcome || !lead_name || !start_date || !end_date) {
     return res.status(400).send('Missing required fields');
   }
-  const stmt = db.prepare(`INSERT INTO projects (name, outcome, lead_name, start_date, end_date, status_tag, cadence, color)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)`);
-  const info = stmt.run(name, outcome, lead_name, start_date, end_date, status_tag || '', cadence || '', color || '#378ADD');
+  const maxOrder = db.prepare('SELECT MAX(sort_order) m FROM projects').get().m;
+  const nextOrder = (maxOrder === null ? -1 : maxOrder) + 1;
+  const stmt = db.prepare(`INSERT INTO projects (name, outcome, lead_name, start_date, end_date, status_tag, cadence, color, sort_order)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`);
+  const info = stmt.run(name, outcome, lead_name, start_date, end_date, status_tag || '', cadence || '', color || '#378ADD', nextOrder);
   res.redirect('/projects/' + info.lastInsertRowid);
 });
 
@@ -152,6 +154,30 @@ app.post('/projects/:id/archive', (req, res) => {
   const project = getProject(req.params.id);
   db.prepare('UPDATE projects SET archived = ? WHERE id = ?').run(project.archived ? 0 : 1, req.params.id);
   res.redirect('/');
+});
+
+app.post('/projects/:id/move', (req, res) => {
+  const project = getProject(req.params.id);
+  if (!project) return res.status(404).send('Project not found');
+  const direction = req.body.direction;
+
+  const siblings = db.prepare(
+    'SELECT * FROM projects WHERE archived = ? ORDER BY sort_order ASC, created_at ASC'
+  ).all(project.archived);
+
+  const idx = siblings.findIndex(p => p.id === project.id);
+  const neighborIdx = direction === 'up' ? idx - 1 : idx + 1;
+
+  if (neighborIdx >= 0 && neighborIdx < siblings.length) {
+    const neighbor = siblings[neighborIdx];
+    const swap = db.transaction(() => {
+      db.prepare('UPDATE projects SET sort_order = ? WHERE id = ?').run(neighbor.sort_order, project.id);
+      db.prepare('UPDATE projects SET sort_order = ? WHERE id = ?').run(project.sort_order, neighbor.id);
+    });
+    swap();
+  }
+
+  res.redirect('/' + (project.archived ? '?archived=1' : ''));
 });
 
 // ---------- Stages ----------
