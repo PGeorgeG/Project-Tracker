@@ -55,6 +55,20 @@ function renderOutcome(text) {
 
 app.locals.renderOutcome = renderOutcome;
 
+// Classifies a todo's due date relative to today: 'overdue', 'soon' (within
+// 2 days), or null (no urgency styling needed).
+function todoUrgency(due_date) {
+  if (!due_date) return null;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const due = new Date(due_date + 'T00:00:00');
+  const diffDays = Math.floor((due - today) / (1000 * 60 * 60 * 24));
+  if (diffDays < 0) return 'overdue';
+  if (diffDays <= 2) return 'soon';
+  return null;
+}
+app.locals.todoUrgency = todoUrgency;
+
 // Safely embeds JSON inside a <script type="application/json"> block by
 // escaping characters that could prematurely close the tag or be
 // misinterpreted by the HTML parser. Avoids the class of bugs caused by
