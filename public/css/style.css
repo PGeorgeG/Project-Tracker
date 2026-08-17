@@ -195,7 +195,7 @@ a:hover { text-decoration: underline; }
 }
 .stage[data-status="done"] { background: var(--accent); }
 .stage[data-status="current"] { background: var(--accent); box-shadow: 0 0 0 3px var(--accent-bg); }
-.stage[data-status="pending"] { background: var(--border-strong); }
+.stage[data-status="pending"] { background: var(--surface); border-color: var(--accent); }
 .stage[data-status="blocked"] { background: var(--red); }
 .stage-label {
   position: absolute; top: 42px; transform: translateX(-50%);
