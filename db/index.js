@@ -13,4 +13,15 @@ db.pragma('foreign_keys = ON');
 const schema = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8');
 db.exec(schema);
 
+// Migration: older databases were created before sort_order existed.
+// CREATE TABLE IF NOT EXISTS won't add columns to an existing table, so
+// add it explicitly if missing, then backfill using existing creation order.
+const projectCols = db.prepare("PRAGMA table_info(projects)").all().map(c => c.name);
+if (!projectCols.includes('sort_order')) {
+  db.exec('ALTER TABLE projects ADD COLUMN sort_order INTEGER DEFAULT 0');
+  const rows = db.prepare('SELECT id FROM projects ORDER BY created_at ASC').all();
+  const setOrder = db.prepare('UPDATE projects SET sort_order = ? WHERE id = ?');
+  rows.forEach((row, i) => setOrder.run(i, row.id));
+}
+
 module.exports = db;
