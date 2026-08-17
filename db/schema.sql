@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS projects (
   cadence TEXT DEFAULT '',
   color TEXT DEFAULT '#378ADD',
   archived INTEGER DEFAULT 0,
+  sort_order INTEGER DEFAULT 0,
   created_at TEXT DEFAULT (datetime('now'))
 );
 
