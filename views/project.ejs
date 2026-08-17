@@ -20,7 +20,7 @@
       </div>
     </div>
 
-    <div class="card">
+    <div class="card" style="border-left: 4px solid <%= project.color %>;">
       <div class="proj-header">
         <h2 style="font-size:15px;">Overview</h2>
         <span class="proj-lead">Lead: <%= project.lead_name %></span>
@@ -96,7 +96,7 @@
       <p class="muted" style="font-size:12px; margin:0 0 0.5rem;">Click the timeline to open the full meeting log below.</p>
 
       <% if (stages.length > 0) { %>
-        <div class="timeline-mount" data-interactive="true" style="margin-bottom:2rem;">
+        <div class="timeline-mount" data-interactive="true" style="margin-bottom:2rem; --accent: <%= project.color %>;">
           <script type="application/json" class="timeline-json"><%- safeJson({
             start: project.start_date,
             end: project.end_date,
