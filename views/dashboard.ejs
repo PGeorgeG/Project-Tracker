@@ -60,8 +60,9 @@
           <div class="tile-todos">
             <p class="tile-links-title">Todos</p>
             <% p.openTodos.forEach(function(t) { %>
+              <% const urgency = todoUrgency(t.due_date); %>
               <form method="POST" action="/projects/<%= p.id %>/todos/<%= t.id %>/toggle" class="tile-todo-row">
-                <label>
+                <label class="<%= urgency === 'overdue' ? 'todo-overdue' : (urgency === 'soon' ? 'todo-soon' : '') %>">
                   <input type="checkbox" onchange="this.form.submit()">
                   <span><%= t.text %><% if (t.due_date) { %> <span class="muted">— <%= t.due_date %></span><% } %></span>
                 </label>
