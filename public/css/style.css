@@ -235,7 +235,9 @@ a:hover { text-decoration: underline; }
 .log-text { color: var(--text-secondary); flex: 1; }
 .log-pin { flex-shrink: 0; font-size: 13px; }
 .log-pin.off { color: var(--text-muted); opacity: .4; }
+.log-actions { display: flex; align-items: center; gap: 6px; }
 .log-actions form { display: inline; }
+.note-edit-form { max-width: 420px; }
 
 /* ---- forms ---- */
 .form-group { margin-bottom: 1rem; }
