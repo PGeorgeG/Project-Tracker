@@ -73,6 +73,22 @@ a:hover { text-decoration: underline; }
   margin-bottom: 1.25rem;
 }
 
+.move-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.move-buttons form { display: block; }
+.move-buttons button {
+  padding: 0 6px;
+  line-height: 1.4;
+  font-size: 12px;
+}
+.move-buttons button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
 .card-link {
   display: block;
   color: inherit;
