@@ -25,7 +25,7 @@
     <% } %>
 
     <% projects.forEach(function(p, idx) { %>
-      <div class="card card-link" onclick="if(!event.target.closest('a, form, button, input, label')) window.location='/projects/<%= p.id %>'">
+      <div class="card card-link" style="border-left: 4px solid <%= p.color %>;" onclick="if(!event.target.closest('a, form, button, input, label')) window.location='/projects/<%= p.id %>'">
         <div class="proj-header">
           <div style="display:flex; align-items:center; gap:8px;">
             <div class="move-buttons">
@@ -52,7 +52,7 @@
           <% if (p.openTodos.length > 0) { %><span class="badge badge-count"><%= p.openTodos.length %> open todo<%= p.openTodos.length > 1 ? 's' : '' %></span><% } %>
         </div>
         <% if (p.stages.length > 0) { %>
-          <div class="timeline-mount" data-interactive="false">
+          <div class="timeline-mount" data-interactive="false" style="--accent: <%= p.color %>;">
             <script type="application/json" class="timeline-json"><%- safeJson({
               start: p.start_date,
               end: p.end_date,
