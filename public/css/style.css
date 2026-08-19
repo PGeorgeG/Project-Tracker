@@ -191,6 +191,10 @@ a:hover { text-decoration: underline; }
 }
 .open-project-link:hover { text-decoration: underline; }
 
+.report-section { margin-top: 1rem; }
+.report-list { margin: 0; padding-left: 20px; font-size: 13px; color: var(--text-secondary); }
+.report-list li { margin-bottom: 6px; line-height: 1.5; }
+
 .tile-todos {
   margin-top: 1rem;
   padding-top: 10px;
