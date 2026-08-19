@@ -240,7 +240,9 @@ app.post('/projects/:id/todos', (req, res) => {
 
 app.post('/projects/:id/todos/:todoId/toggle', (req, res) => {
   const todo = db.prepare('SELECT * FROM todos WHERE id=? AND project_id=?').get(req.params.todoId, req.params.id);
-  db.prepare('UPDATE todos SET done=? WHERE id=?').run(todo.done ? 0 : 1, req.params.todoId);
+  const newDone = todo.done ? 0 : 1;
+  const completedAt = newDone ? new Date().toISOString() : null;
+  db.prepare('UPDATE todos SET done=?, completed_at=? WHERE id=?').run(newDone, completedAt, req.params.todoId);
   res.redirect((req.body && req.body.redirect_to) || ('/projects/' + req.params.id));
 });
 
@@ -288,6 +290,78 @@ app.post('/projects/:id/links', (req, res) => {
 app.post('/projects/:id/links/:linkId/delete', (req, res) => {
   db.prepare('DELETE FROM links WHERE id=? AND project_id=?').run(req.params.linkId, req.params.id);
   res.redirect('/projects/' + req.params.id);
+});
+
+// ---------- Report ----------
+app.get('/report', (req, res) => {
+  const today = new Date();
+  const defaultEnd = today.toISOString().slice(0, 10);
+  const defaultStartDate = new Date(today);
+  defaultStartDate.setDate(defaultStartDate.getDate() - 30);
+  const defaultStart = defaultStartDate.toISOString().slice(0, 10);
+
+  const start = req.query.start || defaultStart;
+  const end = req.query.end || defaultEnd;
+
+  const futureCutoffDate = new Date(end + 'T00:00:00');
+  futureCutoffDate.setDate(futureCutoffDate.getDate() + 30);
+  const futureCutoff = futureCutoffDate.toISOString().slice(0, 10);
+
+  const projects = db.prepare(
+    'SELECT * FROM projects WHERE archived = 0 ORDER BY sort_order ASC, created_at ASC'
+  ).all();
+
+  const reportData = projects.map(p => {
+    const notes = db.prepare(
+      'SELECT * FROM notes WHERE project_id=? AND meeting_date BETWEEN ? AND ? ORDER BY meeting_date ASC'
+    ).all(p.id, start, end);
+
+    const blockedStages = db.prepare(
+      "SELECT * FROM stages WHERE project_id=? AND status='blocked' ORDER BY target_date ASC"
+    ).all(p.id);
+
+    const openAlerts = db.prepare(
+      'SELECT * FROM alerts WHERE project_id=? AND dismissed=0 ORDER BY trigger_date ASC'
+    ).all(p.id);
+
+    const completedTodos = db.prepare(
+      "SELECT * FROM todos WHERE project_id=? AND done=1 AND completed_at IS NOT NULL AND date(completed_at) BETWEEN ? AND ? ORDER BY completed_at ASC"
+    ).all(p.id, start, end);
+
+    const newOpenTodos = db.prepare(
+      "SELECT * FROM todos WHERE project_id=? AND done=0 AND date(created_at) BETWEEN ? AND ? ORDER BY created_at ASC"
+    ).all(p.id, start, end);
+
+    const carryoverTodos = db.prepare(
+      "SELECT * FROM todos WHERE project_id=? AND done=0 AND date(created_at) < ? ORDER BY due_date ASC"
+    ).all(p.id, start);
+
+    const upcomingStages = db.prepare(
+      "SELECT * FROM stages WHERE project_id=? AND status NOT IN ('done','blocked') AND target_date BETWEEN ? AND ? ORDER BY target_date ASC"
+    ).all(p.id, end, futureCutoff);
+
+    const upcomingTodos = db.prepare(
+      'SELECT * FROM todos WHERE project_id=? AND done=0 AND due_date BETWEEN ? AND ? ORDER BY due_date ASC'
+    ).all(p.id, end, futureCutoff);
+
+    return {
+      ...p, notes, blockedStages, openAlerts, completedTodos, newOpenTodos, carryoverTodos, upcomingStages, upcomingTodos,
+      chokepointNotes: notes.filter(n => n.tone === 'red'),
+      warningNotes: notes.filter(n => n.tone === 'amber'),
+      successNotes: notes.filter(n => n.tone === 'green')
+    };
+  });
+
+  const totals = {
+    projects: reportData.length,
+    notes: reportData.reduce((sum, p) => sum + p.notes.length, 0),
+    chokepoints: reportData.reduce((sum, p) => sum + p.chokepointNotes.length, 0),
+    successes: reportData.reduce((sum, p) => sum + p.successNotes.length, 0),
+    completedTodos: reportData.reduce((sum, p) => sum + p.completedTodos.length, 0),
+    openTodos: reportData.reduce((sum, p) => sum + p.carryoverTodos.length + p.newOpenTodos.length, 0)
+  };
+
+  res.render('report', { reportData, start, end, totals });
 });
 
 const PORT = process.env.PORT || 3000;
