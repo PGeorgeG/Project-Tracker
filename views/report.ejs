@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Report</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div>
+        <a href="/" style="font-size:13px;">&larr; All projects</a>
+        <h1 style="margin-top:4px;">Report</h1>
+      </div>
+    </div>
+
+    <div class="card">
+      <form method="GET" action="/report" class="form-row" style="align-items:flex-end;">
+        <div class="form-group">
+          <label>From</label>
+          <input type="date" name="start" value="<%= start %>">
+        </div>
+        <div class="form-group">
+          <label>To</label>
+          <input type="date" name="end" value="<%= end %>">
+        </div>
+        <div class="form-group" style="flex:0;">
+          <button type="submit" class="btn btn-primary">Update range</button>
+        </div>
+      </form>
+      <p class="muted" style="font-size:12px; margin-top:4px;">Defaults to the last 30 days. Select all the text below to copy it into your own report.</p>
+    </div>
+
+    <div class="card">
+      <p class="section-title">Summary — <%= start %> to <%= end %></p>
+      <div class="meta-row">
+        <span class="badge badge-count"><%= totals.projects %> active project<%= totals.projects === 1 ? '' : 's' %></span>
+        <span class="badge badge-count"><%= totals.notes %> meeting note<%= totals.notes === 1 ? '' : 's' %> logged</span>
+        <% if (totals.chokepoints > 0) { %><span class="badge badge-at-risk"><%= totals.chokepoints %> chokepoint<%= totals.chokepoints === 1 ? '' : 's' %> noted</span><% } %>
+        <% if (totals.successes > 0) { %><span class="badge badge-on-track"><%= totals.successes %> success<%= totals.successes === 1 ? '' : 'es' %> noted</span><% } %>
+        <span class="badge badge-count"><%= totals.completedTodos %> todo<%= totals.completedTodos === 1 ? '' : 's' %> completed</span>
+        <span class="badge badge-count"><%= totals.openTodos %> todo<%= totals.openTodos === 1 ? '' : 's' %> still open</span>
+      </div>
+    </div>
+
+    <% reportData.forEach(function(p) { %>
+      <div class="card" style="border-left: 4px solid <%= p.color %>;">
+        <div class="proj-header">
+          <h2 style="font-size:16px;"><%= p.name %></h2>
+          <span class="proj-lead">Lead: <%= p.lead_name %></span>
+        </div>
+        <% if (p.status_tag) { %><span class="badge badge-<%= p.status_tag.replace(' ', '-') %>"><%= p.status_tag %></span><% } %>
+
+        <div class="report-section">
+          <p class="section-title">What I worked on</p>
+          <% if (p.notes.length === 0) { %>
+            <p class="empty-state">No updates logged this period.</p>
+          <% } else { %>
+            <ul class="report-list">
+              <% p.notes.forEach(function(n) { %>
+                <li><span class="muted"><%= n.meeting_date %> —</span> <%= n.text %></li>
+              <% }); %>
+            </ul>
+          <% } %>
+        </div>
+
+        <div class="report-section">
+          <p class="section-title">Roadblocks</p>
+          <% if (p.blockedStages.length === 0 && p.openAlerts.length === 0 && p.chokepointNotes.length === 0 && p.warningNotes.length === 0) { %>
+            <p class="empty-state">No roadblocks noted.</p>
+          <% } else { %>
+            <ul class="report-list">
+              <% p.blockedStages.forEach(function(s) { %>
+                <li class="todo-overdue">Stage blocked: <%= s.label %> (target <%= s.target_date %>)</li>
+              <% }); %>
+              <% p.openAlerts.forEach(function(a) { %>
+                <li class="todo-soon">Open alert: <%= a.note %> (<%= a.trigger_date %>)</li>
+              <% }); %>
+              <% p.chokepointNotes.forEach(function(n) { %>
+                <li><span class="muted"><%= n.meeting_date %> —</span> <%= n.text %></li>
+              <% }); %>
+              <% p.warningNotes.forEach(function(n) { %>
+                <li><span class="muted"><%= n.meeting_date %> —</span> <%= n.text %></li>
+              <% }); %>
+            </ul>
+          <% } %>
+        </div>
+
+        <div class="report-section">
+          <p class="section-title">Successes</p>
+          <% if (p.successNotes.length === 0 && p.completedTodos.length === 0) { %>
+            <p class="empty-state">No successes logged this period.</p>
+          <% } else { %>
+            <ul class="report-list">
+              <% p.successNotes.forEach(function(n) { %>
+                <li><span class="muted"><%= n.meeting_date %> —</span> <%= n.text %></li>
+              <% }); %>
+              <% p.completedTodos.forEach(function(t) { %>
+                <li>Completed: <%= t.text %></li>
+              <% }); %>
+            </ul>
+          <% } %>
+        </div>
+
+        <div class="report-section">
+          <p class="section-title">Todo list</p>
+          <% if (p.newOpenTodos.length === 0 && p.carryoverTodos.length === 0) { %>
+            <p class="empty-state">No open todos.</p>
+          <% } else { %>
+            <ul class="report-list">
+              <% p.carryoverTodos.forEach(function(t) { %>
+                <li><%= t.text %><% if (t.due_date) { %> <span class="muted">— due <%= t.due_date %></span><% } %> <span class="muted">(carried over)</span></li>
+              <% }); %>
+              <% p.newOpenTodos.forEach(function(t) { %>
+                <li><%= t.text %><% if (t.due_date) { %> <span class="muted">— due <%= t.due_date %></span><% } %></li>
+              <% }); %>
+            </ul>
+          <% } %>
+        </div>
+
+        <div class="report-section">
+          <p class="section-title">What's next</p>
+          <% if (p.upcomingStages.length === 0 && p.upcomingTodos.length === 0) { %>
+            <p class="empty-state">Nothing specifically due in the next 30 days.</p>
+          <% } else { %>
+            <ul class="report-list">
+              <% p.upcomingStages.forEach(function(s) { %>
+                <li>Stage due: <%= s.label %> — <%= s.target_date %></li>
+              <% }); %>
+              <% p.upcomingTodos.forEach(function(t) { %>
+                <li>Todo due: <%= t.text %> — <%= t.due_date %></li>
+              <% }); %>
+            </ul>
+          <% } %>
+        </div>
+      </div>
+    <% }); %>
+  </div>
+</body>
+</html>
