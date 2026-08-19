@@ -30,6 +30,60 @@ body {
 a { color: var(--accent); text-decoration: none; }
 a:hover { text-decoration: underline; }
 
+.wrap-wide { max-width: 1280px; }
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 2rem;
+  align-items: start;
+}
+.dashboard-sidebar {
+  position: sticky;
+  top: 1.5rem;
+}
+@media (max-width: 900px) {
+  .dashboard-grid { grid-template-columns: 1fr; }
+  .dashboard-sidebar { position: static; }
+}
+
+.global-todo-row {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+.global-todo-row:last-child { border-bottom: none; }
+.global-todo-row label {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  cursor: pointer;
+  color: var(--text);
+}
+.global-todo-row input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  margin-top: 1px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.global-todo-text { font-weight: 500; }
+.global-todo-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 3px 0 0 23px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.global-todo-meta a { color: var(--text-secondary); }
+.project-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
 .wrap {
   max-width: 960px;
   margin: 0 auto;
