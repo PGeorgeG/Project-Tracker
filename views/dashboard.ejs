@@ -40,6 +40,7 @@
               <button type="submit" class="btn btn-small" <%= idx === projects.length - 1 ? 'disabled' : '' %> title="Move down">&darr;</button>
             </form>
           </div>
+          <button type="button" class="btn btn-small quick-todo-btn" data-project-id="<%= p.id %>" data-project-name="<%= p.name %>" title="Quick add a todo">+ Todo</button>
           <details class="project-details">
             <summary class="project-summary">
               <span class="summary-chevron">&rsaquo;</span>
@@ -174,7 +175,23 @@
     <button type="button" id="ctxRemoveToday">Remove from Today List</button>
   </div>
 
+  <div id="quickTodoModal" class="quick-todo-overlay" style="display:none;">
+    <div class="quick-todo-box">
+      <p class="quick-todo-project-name"></p>
+      <form method="POST" id="quickTodoForm">
+        <input type="hidden" name="redirect_to" value="/">
+        <input type="hidden" name="due_date" value="<%= tomorrowStr %>">
+        <input type="text" name="text" id="quickTodoInput" placeholder="What needs doing" required autocomplete="off">
+        <div class="quick-todo-actions">
+          <button type="button" id="quickTodoCancel" class="btn btn-small">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-small">Add</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script src="/js/timeline.js"></script>
   <script src="/js/today-list.js"></script>
+  <script src="/js/quick-todo.js"></script>
 </body>
 </html>
