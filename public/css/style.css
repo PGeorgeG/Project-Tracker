@@ -150,6 +150,47 @@ a:hover { text-decoration: underline; }
 }
 .card-link:hover { text-decoration: none; border-color: var(--border-strong); }
 
+.project-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  margin-bottom: 1rem;
+}
+.project-row-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 1rem 1.5rem;
+}
+.project-details { flex: 1; min-width: 0; }
+.project-summary {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  cursor: pointer;
+  list-style: none;
+}
+.project-summary::-webkit-details-marker { display: none; }
+.project-summary h2 { font-size: 16px; font-weight: 600; margin: 0; }
+.summary-chevron {
+  display: inline-block;
+  font-size: 22px;
+  color: var(--text-muted);
+  transition: transform 0.15s ease;
+  line-height: 1;
+}
+.project-details[open] .summary-chevron { transform: rotate(90deg); }
+.project-body { padding-top: 1rem; cursor: pointer; }
+.open-project-link {
+  display: inline-block;
+  margin-top: 1rem;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--accent);
+}
+.open-project-link:hover { text-decoration: underline; }
+
 .tile-todos {
   margin-top: 1rem;
   padding-top: 10px;
