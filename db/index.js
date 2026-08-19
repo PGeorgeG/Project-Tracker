@@ -30,5 +30,8 @@ if (!todoCols.includes('completed_at')) {
   // Existing completed todos predate this column, so their completion date
   // is unknown; leave completed_at null for them rather than guessing.
 }
+if (!todoCols.includes('today_list_date')) {
+  db.exec('ALTER TABLE todos ADD COLUMN today_list_date TEXT DEFAULT NULL');
+}
 
 module.exports = db;
