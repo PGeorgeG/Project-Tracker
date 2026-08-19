@@ -105,6 +105,15 @@ app.get('/', (req, res) => {
     return { ...p, stages, openAlerts, openTodos, links };
   });
 
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const todayListTodos = db.prepare(`
+    SELECT todos.*, projects.name AS project_name, projects.color AS project_color
+    FROM todos
+    JOIN projects ON projects.id = todos.project_id
+    WHERE todos.done = 0 AND todos.today_list_date = ? AND projects.archived = 0
+    ORDER BY todos.id ASC
+  `).all(todayStr);
+
   const globalTodos = db.prepare(`
     SELECT todos.*, projects.name AS project_name, projects.color AS project_color
     FROM todos
@@ -113,7 +122,7 @@ app.get('/', (req, res) => {
     ORDER BY todos.due_date ASC
   `).all();
 
-  res.render('dashboard', { projects: projectData, showArchived, globalTodos });
+  res.render('dashboard', { projects: projectData, showArchived, globalTodos, todayListTodos, todayStr });
 });
 
 // ---------- Create project ----------
@@ -243,6 +252,17 @@ app.post('/projects/:id/todos/:todoId/toggle', (req, res) => {
   const newDone = todo.done ? 0 : 1;
   const completedAt = newDone ? new Date().toISOString() : null;
   db.prepare('UPDATE todos SET done=?, completed_at=? WHERE id=?').run(newDone, completedAt, req.params.todoId);
+  res.redirect((req.body && req.body.redirect_to) || ('/projects/' + req.params.id));
+});
+
+app.post('/projects/:id/todos/:todoId/today', (req, res) => {
+  const today = new Date().toISOString().slice(0, 10);
+  db.prepare('UPDATE todos SET today_list_date=? WHERE id=? AND project_id=?').run(today, req.params.todoId, req.params.id);
+  res.redirect((req.body && req.body.redirect_to) || ('/projects/' + req.params.id));
+});
+
+app.post('/projects/:id/todos/:todoId/today/remove', (req, res) => {
+  db.prepare('UPDATE todos SET today_list_date=NULL WHERE id=? AND project_id=?').run(req.params.todoId, req.params.id);
   res.redirect((req.body && req.body.redirect_to) || ('/projects/' + req.params.id));
 });
 
