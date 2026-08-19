@@ -68,6 +68,43 @@ a:hover { text-decoration: underline; }
   cursor: pointer;
 }
 .global-todo-text { font-weight: 500; }
+.quick-todo-btn { flex-shrink: 0; align-self: flex-start; margin-top: 2px; }
+
+.quick-todo-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+.quick-todo-box {
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 1.25rem;
+  width: 100%;
+  max-width: 340px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+}
+.quick-todo-project-name {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0 0 10px;
+  font-weight: 500;
+}
+.quick-todo-box input[type="text"] {
+  font-size: 15px;
+  padding: 10px 12px;
+}
+.quick-todo-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+}
+
 .row-kebab {
   background: none;
   border: none;
