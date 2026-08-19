@@ -106,6 +106,10 @@ app.get('/', (req, res) => {
   });
 
   const todayStr = new Date().toISOString().slice(0, 10);
+  const tomorrowDate = new Date();
+  tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+  const tomorrowStr = tomorrowDate.toISOString().slice(0, 10);
+
   const todayListTodos = db.prepare(`
     SELECT todos.*, projects.name AS project_name, projects.color AS project_color
     FROM todos
@@ -122,7 +126,7 @@ app.get('/', (req, res) => {
     ORDER BY todos.due_date ASC
   `).all();
 
-  res.render('dashboard', { projects: projectData, showArchived, globalTodos, todayListTodos, todayStr });
+  res.render('dashboard', { projects: projectData, showArchived, globalTodos, todayListTodos, todayStr, tomorrowStr });
 });
 
 // ---------- Create project ----------
