@@ -24,4 +24,11 @@ if (!projectCols.includes('sort_order')) {
   rows.forEach((row, i) => setOrder.run(i, row.id));
 }
 
+const todoCols = db.prepare("PRAGMA table_info(todos)").all().map(c => c.name);
+if (!todoCols.includes('completed_at')) {
+  db.exec('ALTER TABLE todos ADD COLUMN completed_at TEXT DEFAULT NULL');
+  // Existing completed todos predate this column, so their completion date
+  // is unknown; leave completed_at null for them rather than guessing.
+}
+
 module.exports = db;
