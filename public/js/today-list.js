@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const lines = Array.from(rows).map(function (r) {
         return '- ' + r.dataset.todoText + ' (' + r.dataset.projectName + ')';
       });
-      const text = lines.join('\n');
+      const text = 'Project Tracker Todo List\n\n' + lines.join('\n');
 
       function fallbackCopy(text) {
         const ta = document.createElement('textarea');
