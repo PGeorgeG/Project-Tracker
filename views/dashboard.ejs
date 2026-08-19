@@ -114,13 +114,41 @@
 
       <aside class="dashboard-sidebar">
         <div class="card">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <p class="section-title" style="margin:0;">Today</p>
+            <% if (todayListTodos.length > 0) { %>
+              <button type="button" class="btn btn-small" id="copyTodayListBtn">Copy list</button>
+            <% } %>
+          </div>
+          <% if (todayListTodos.length === 0) { %>
+            <p class="empty-state">Right-click (or tap &#8942;) a todo to add it here.</p>
+          <% } %>
+          <% todayListTodos.forEach(function(t) { %>
+            <div class="today-list-row" data-todo-text="<%= t.text %>" data-project-name="<%= t.project_name %>">
+              <form method="POST" action="/projects/<%= t.project_id %>/todos/<%= t.id %>/toggle" style="display:inline;">
+                <input type="hidden" name="redirect_to" value="/">
+                <label>
+                  <input type="checkbox" onchange="this.form.submit()">
+                  <span><%= t.text %></span>
+                </label>
+              </form>
+              <form method="POST" action="/projects/<%= t.project_id %>/todos/<%= t.id %>/today/remove">
+                <input type="hidden" name="redirect_to" value="/">
+                <button type="submit" class="today-remove-btn" title="Remove from Today">&times;</button>
+              </form>
+            </div>
+          <% }); %>
+        </div>
+
+        <div class="card">
           <p class="section-title">Upcoming todos</p>
           <% if (globalTodos.length === 0) { %>
             <p class="empty-state">Nothing with a due date right now.</p>
           <% } %>
           <% globalTodos.forEach(function(t) { %>
             <% const urgency = todoUrgency(t.due_date); %>
-            <div class="global-todo-row">
+            <% const onToday = t.today_list_date === todayStr; %>
+            <div class="global-todo-row" data-project-id="<%= t.project_id %>" data-todo-id="<%= t.id %>" data-on-today="<%= onToday %>">
               <form method="POST" action="/projects/<%= t.project_id %>/todos/<%= t.id %>/toggle">
                 <input type="hidden" name="redirect_to" value="/">
                 <label class="<%= urgency === 'overdue' ? 'todo-overdue' : (urgency === 'soon' ? 'todo-soon' : '') %>">
@@ -132,6 +160,7 @@
                 <span class="project-dot" style="background:<%= t.project_color %>;"></span>
                 <a href="/projects/<%= t.project_id %>"><%= t.project_name %></a>
                 <span class="muted">— <%= t.due_date %></span>
+                <button type="button" class="row-kebab" title="More options">&#8942;</button>
               </div>
             </div>
           <% }); %>
@@ -139,6 +168,13 @@
       </aside>
     </div>
   </div>
+
+  <div id="todoContextMenu" class="context-menu" style="display:none;">
+    <button type="button" id="ctxAddToday">Add to Today List</button>
+    <button type="button" id="ctxRemoveToday">Remove from Today List</button>
+  </div>
+
   <script src="/js/timeline.js"></script>
+  <script src="/js/today-list.js"></script>
 </body>
 </html>
