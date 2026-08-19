@@ -105,7 +105,15 @@ app.get('/', (req, res) => {
     return { ...p, stages, openAlerts, openTodos, links };
   });
 
-  res.render('dashboard', { projects: projectData, showArchived });
+  const globalTodos = db.prepare(`
+    SELECT todos.*, projects.name AS project_name, projects.color AS project_color
+    FROM todos
+    JOIN projects ON projects.id = todos.project_id
+    WHERE todos.done = 0 AND todos.due_date IS NOT NULL AND projects.archived = 0
+    ORDER BY todos.due_date ASC
+  `).all();
+
+  res.render('dashboard', { projects: projectData, showArchived, globalTodos });
 });
 
 // ---------- Create project ----------
@@ -233,7 +241,7 @@ app.post('/projects/:id/todos', (req, res) => {
 app.post('/projects/:id/todos/:todoId/toggle', (req, res) => {
   const todo = db.prepare('SELECT * FROM todos WHERE id=? AND project_id=?').get(req.params.todoId, req.params.id);
   db.prepare('UPDATE todos SET done=? WHERE id=?').run(todo.done ? 0 : 1, req.params.todoId);
-  res.redirect('/projects/' + req.params.id);
+  res.redirect((req.body && req.body.redirect_to) || ('/projects/' + req.params.id));
 });
 
 app.post('/projects/:id/todos/:todoId/delete', (req, res) => {
