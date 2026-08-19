@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <div class="wrap">
+  <div class="wrap wrap-wide">
     <div class="topbar">
       <h1>Project tracker</h1>
       <div style="display:flex; gap:8px;">
@@ -16,13 +16,15 @@
       </div>
     </div>
 
-    <% if (projects.length === 0) { %>
-      <div class="card">
-        <p class="empty-state">
-          <% if (showArchived) { %>No archived projects.<% } else { %>No active projects yet. Create your first one to get started.<% } %>
-        </p>
-      </div>
-    <% } %>
+    <div class="dashboard-grid">
+      <div class="dashboard-main">
+        <% if (projects.length === 0) { %>
+          <div class="card">
+            <p class="empty-state">
+              <% if (showArchived) { %>No archived projects.<% } else { %>No active projects yet. Create your first one to get started.<% } %>
+            </p>
+          </div>
+        <% } %>
 
     <% projects.forEach(function(p, idx) { %>
       <div class="card card-link" style="border-left: 4px solid <%= p.color %>;" onclick="if(!event.target.closest('a, form, button, input, label')) window.location='/projects/<%= p.id %>'">
@@ -74,6 +76,7 @@
             <% p.openTodos.forEach(function(t) { %>
               <% const urgency = todoUrgency(t.due_date); %>
               <form method="POST" action="/projects/<%= p.id %>/todos/<%= t.id %>/toggle" class="tile-todo-row">
+                <input type="hidden" name="redirect_to" value="/">
                 <label class="<%= urgency === 'overdue' ? 'todo-overdue' : (urgency === 'soon' ? 'todo-soon' : '') %>">
                   <input type="checkbox" onchange="this.form.submit()">
                   <span><%= t.text %><% if (t.due_date) { %> <span class="muted">— <%= t.due_date %></span><% } %></span>
@@ -93,6 +96,34 @@
         <% } %>
       </div>
     <% }); %>
+      </div>
+
+      <aside class="dashboard-sidebar">
+        <div class="card">
+          <p class="section-title">Upcoming todos</p>
+          <% if (globalTodos.length === 0) { %>
+            <p class="empty-state">Nothing with a due date right now.</p>
+          <% } %>
+          <% globalTodos.forEach(function(t) { %>
+            <% const urgency = todoUrgency(t.due_date); %>
+            <div class="global-todo-row">
+              <form method="POST" action="/projects/<%= t.project_id %>/todos/<%= t.id %>/toggle">
+                <input type="hidden" name="redirect_to" value="/">
+                <label class="<%= urgency === 'overdue' ? 'todo-overdue' : (urgency === 'soon' ? 'todo-soon' : '') %>">
+                  <input type="checkbox" onchange="this.form.submit()">
+                  <span class="global-todo-text"><%= t.text %></span>
+                </label>
+              </form>
+              <div class="global-todo-meta">
+                <span class="project-dot" style="background:<%= t.project_color %>;"></span>
+                <a href="/projects/<%= t.project_id %>"><%= t.project_name %></a>
+                <span class="muted">— <%= t.due_date %></span>
+              </div>
+            </div>
+          <% }); %>
+        </div>
+      </aside>
+    </div>
   </div>
   <script src="/js/timeline.js"></script>
 </body>
