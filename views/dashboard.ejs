@@ -69,7 +69,7 @@
                     start: p.start_date,
                     end: p.end_date,
                     stages: p.stages,
-                    notes: [],
+                    notes: p.notes,
                     progressPct: (function() {
                       const done = p.stages.filter(s => s.status === "done").length;
                       return p.stages.length ? Math.round((done / p.stages.length) * 100) : 0;
