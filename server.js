@@ -251,6 +251,13 @@ app.post('/projects/:id/todos', (req, res) => {
   res.redirect('/projects/' + req.params.id);
 });
 
+app.post('/projects/:id/todos/:todoId/edit', (req, res) => {
+  const { text, due_date } = req.body;
+  db.prepare('UPDATE todos SET text=?, due_date=? WHERE id=? AND project_id=?')
+    .run(text, due_date || null, req.params.todoId, req.params.id);
+  res.redirect('/projects/' + req.params.id);
+});
+
 app.post('/projects/:id/todos/:todoId/toggle', (req, res) => {
   const todo = db.prepare('SELECT * FROM todos WHERE id=? AND project_id=?').get(req.params.todoId, req.params.id);
   const newDone = todo.done ? 0 : 1;
