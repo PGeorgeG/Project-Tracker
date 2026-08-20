@@ -186,7 +186,7 @@
     </div>
 
     <div class="two-col">
-      <div class="card">
+      <div class="card ticket-card">
         <p class="section-title">Key stages</p>
         <% if (stages.length === 0) { %>
           <p class="empty-state">No stages yet.</p>
@@ -227,7 +227,9 @@
           </div>
         <% }); %>
 
-        <form method="POST" action="/projects/<%= project.id %>/stages" style="margin-top:1rem;">
+        <div class="ticket-perforation"></div>
+
+        <form method="POST" action="/projects/<%= project.id %>/stages">
           <div class="form-group">
             <label>Stage label</label>
             <input type="text" name="label" required placeholder="e.g. Curriculum draft">
