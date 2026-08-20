@@ -120,39 +120,41 @@
         <% notes.slice().reverse().forEach(function(n) { %>
           <div class="log-row-wrap">
             <div class="log-row">
-              <span class="log-date"><%= n.meeting_date %></span>
-              <span class="log-text"><%= n.text %></span>
-              <span class="log-pin <%= n.posted_on_timeline ? 'on' : 'off' %>" style="<%= n.posted_on_timeline ? 'color:var(--' + n.tone + ')' : '' %>">
-                <%= n.posted_on_timeline ? '●' : '○' %>
-              </span>
-              <span class="log-actions">
-                <details class="stage-edit-toggle">
-                  <summary class="btn btn-small">Edit</summary>
-                  <form method="POST" action="/projects/<%= project.id %>/notes/<%= n.id %>/edit" class="stage-edit-form note-edit-form">
-                    <div class="form-group">
-                      <label>Meeting date</label>
-                      <input type="date" name="meeting_date" value="<%= n.meeting_date %>" required>
-                    </div>
-                    <div class="form-group">
-                      <label>What happened</label>
-                      <textarea name="text" required><%= n.text %></textarea>
-                    </div>
-                    <div class="checkbox-row">
-                      <input type="checkbox" name="posted_on_timeline" value="1" id="postToggle-<%= n.id %>" <%= n.posted_on_timeline ? 'checked' : '' %> onchange="document.getElementById('toneRow-<%= n.id %>').style.display = this.checked ? 'flex' : 'none';">
-                      <label for="postToggle-<%= n.id %>" style="margin:0;">Post on timeline</label>
-                    </div>
-                    <div class="tone-row" id="toneRow-<%= n.id %>" style="display:<%= n.posted_on_timeline ? 'flex' : 'none' %>;">
-                      <label style="color:var(--red);"><input type="radio" name="tone" value="red" <%= n.tone === 'red' ? 'checked' : '' %>> Chokepoint</label>
-                      <label style="color:var(--amber);"><input type="radio" name="tone" value="amber" <%= n.tone === 'amber' ? 'checked' : '' %>> Warning</label>
-                      <label style="color:var(--green);"><input type="radio" name="tone" value="green" <%= (n.tone === 'green' || !n.tone) ? 'checked' : '' %>> All good</label>
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-small">Save note</button>
+              <div class="log-row-head">
+                <span class="log-date"><%= n.meeting_date %></span>
+                <span class="log-pin <%= n.posted_on_timeline ? 'on' : 'off' %>" style="<%= n.posted_on_timeline ? 'color:var(--' + n.tone + ')' : '' %>">
+                  <%= n.posted_on_timeline ? '●' : '○' %>
+                </span>
+                <span class="log-actions">
+                  <details class="stage-edit-toggle">
+                    <summary class="btn btn-small">Edit</summary>
+                    <form method="POST" action="/projects/<%= project.id %>/notes/<%= n.id %>/edit" class="stage-edit-form note-edit-form">
+                      <div class="form-group">
+                        <label>Meeting date</label>
+                        <input type="date" name="meeting_date" value="<%= n.meeting_date %>" required>
+                      </div>
+                      <div class="form-group">
+                        <label>What happened <span class="muted" style="font-weight:400;">— start a line with - for a bullet point</span></label>
+                        <textarea name="text" required><%= n.text %></textarea>
+                      </div>
+                      <div class="checkbox-row">
+                        <input type="checkbox" name="posted_on_timeline" value="1" id="postToggle-<%= n.id %>" <%= n.posted_on_timeline ? 'checked' : '' %> onchange="document.getElementById('toneRow-<%= n.id %>').style.display = this.checked ? 'flex' : 'none';">
+                        <label for="postToggle-<%= n.id %>" style="margin:0;">Post on timeline</label>
+                      </div>
+                      <div class="tone-row" id="toneRow-<%= n.id %>" style="display:<%= n.posted_on_timeline ? 'flex' : 'none' %>;">
+                        <label style="color:var(--red);"><input type="radio" name="tone" value="red" <%= n.tone === 'red' ? 'checked' : '' %>> Chokepoint</label>
+                        <label style="color:var(--amber);"><input type="radio" name="tone" value="amber" <%= n.tone === 'amber' ? 'checked' : '' %>> Warning</label>
+                        <label style="color:var(--green);"><input type="radio" name="tone" value="green" <%= (n.tone === 'green' || !n.tone) ? 'checked' : '' %>> All good</label>
+                      </div>
+                      <button type="submit" class="btn btn-primary btn-small">Save note</button>
+                    </form>
+                  </details>
+                  <form method="POST" action="/projects/<%= project.id %>/notes/<%= n.id %>/delete" onsubmit="return confirm('Delete this note?');">
+                    <button type="submit" class="btn btn-small">Delete</button>
                   </form>
-                </details>
-                <form method="POST" action="/projects/<%= project.id %>/notes/<%= n.id %>/delete" onsubmit="return confirm('Delete this note?');">
-                  <button type="submit" class="btn btn-small">Delete</button>
-                </form>
-              </span>
+                </span>
+              </div>
+              <div class="log-text rich-text"><%- renderOutcome(n.text) %></div>
             </div>
           </div>
         <% }); %>
@@ -165,8 +167,8 @@
               <input type="date" name="meeting_date" required value="<%= new Date().toISOString().slice(0,10) %>">
             </div>
             <div class="form-group">
-              <label>What happened</label>
-              <textarea name="text" required placeholder="Notes from this meeting"></textarea>
+              <label>What happened <span class="muted" style="font-weight:400;">— start a line with - for a bullet point</span></label>
+              <textarea name="text" required placeholder="Notes from this meeting&#10;Start a line with - for a bullet point"></textarea>
             </div>
             <div class="checkbox-row">
               <input type="checkbox" id="postToggle" name="posted_on_timeline" value="1">
@@ -254,15 +256,31 @@
           <p class="empty-state">No todos yet.</p>
         <% } %>
         <% todos.forEach(function(t) { %>
-          <div class="todo-row">
-            <form method="POST" action="/projects/<%= project.id %>/todos/<%= t.id %>/toggle">
-              <button type="submit" class="btn btn-small"><%= t.done ? '↺' : '✓' %></button>
-            </form>
-            <span class="grow" style="<%= t.done ? 'text-decoration:line-through; color:var(--text-muted);' : '' %>"><%= t.text %></span>
-            <% if (t.due_date) { %><span class="muted"><%= t.due_date %></span><% } %>
-            <form method="POST" action="/projects/<%= project.id %>/todos/<%= t.id %>/delete">
-              <button type="submit" class="btn btn-small">Delete</button>
-            </form>
+          <div class="todo-row-wrap">
+            <div class="todo-row">
+              <form method="POST" action="/projects/<%= project.id %>/todos/<%= t.id %>/toggle">
+                <button type="submit" class="btn btn-small"><%= t.done ? '↺' : '✓' %></button>
+              </form>
+              <span class="grow" style="<%= t.done ? 'text-decoration:line-through; color:var(--text-muted);' : '' %>"><%= t.text %></span>
+              <% if (t.due_date) { %><span class="muted"><%= t.due_date %></span><% } %>
+              <details class="stage-edit-toggle">
+                <summary class="btn btn-small">Edit</summary>
+                <form method="POST" action="/projects/<%= project.id %>/todos/<%= t.id %>/edit" class="stage-edit-form">
+                  <div class="form-group">
+                    <label>Todo text</label>
+                    <input type="text" name="text" value="<%= t.text %>" required>
+                  </div>
+                  <div class="form-group">
+                    <label>Due date (optional)</label>
+                    <input type="date" name="due_date" value="<%= t.due_date || '' %>">
+                  </div>
+                  <button type="submit" class="btn btn-primary btn-small">Save todo</button>
+                </form>
+              </details>
+              <form method="POST" action="/projects/<%= project.id %>/todos/<%= t.id %>/delete">
+                <button type="submit" class="btn btn-small">Delete</button>
+              </form>
+            </div>
           </div>
         <% }); %>
 
