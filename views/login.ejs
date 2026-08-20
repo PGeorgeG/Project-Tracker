@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Log in — Project tracker</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="wrap" style="max-width:360px; padding-top:4rem;">
+    <div class="card">
+      <h1 style="font-size:18px; margin:0 0 1rem;">Project tracker</h1>
+      <% if (error) { %>
+        <p style="color:var(--red); font-size:13px; margin:0 0 1rem;"><%= error %></p>
+      <% } %>
+      <form method="POST" action="/login">
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" required autofocus>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%;">Log in</button>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

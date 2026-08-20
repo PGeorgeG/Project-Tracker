@@ -14,6 +14,9 @@
         <a class="btn" href="/report">Report</a>
         <a class="btn" href="/?archived=<%= showArchived ? '0' : '1' %>"><%= showArchived ? 'Show active' : 'Show archived' %></a>
         <a class="btn btn-primary" href="/projects/new">New project</a>
+        <form method="POST" action="/logout" style="display:inline;">
+          <button type="submit" class="btn btn-small">Log out</button>
+        </form>
       </div>
     </div>
 
