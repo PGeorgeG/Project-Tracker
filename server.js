@@ -99,10 +99,11 @@ app.get('/', (req, res) => {
 
   const projectData = projects.map(p => {
     const stages = db.prepare('SELECT * FROM stages WHERE project_id = ? ORDER BY target_date ASC').all(p.id);
+    const notes = db.prepare('SELECT * FROM notes WHERE project_id = ? ORDER BY meeting_date ASC').all(p.id);
     const openAlerts = db.prepare('SELECT COUNT(*) c FROM alerts WHERE project_id = ? AND dismissed = 0').get(p.id).c;
     const openTodos = db.prepare('SELECT * FROM todos WHERE project_id = ? AND done = 0 ORDER BY due_date ASC').all(p.id);
     const links = db.prepare('SELECT * FROM links WHERE project_id = ? ORDER BY created_at ASC').all(p.id);
-    return { ...p, stages, openAlerts, openTodos, links };
+    return { ...p, stages, notes, openAlerts, openTodos, links };
   });
 
   const todayStr = new Date().toISOString().slice(0, 10);
