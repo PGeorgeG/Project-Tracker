@@ -265,7 +265,7 @@
               <% if (t.due_date) { %><span class="muted"><%= t.due_date %></span><% } %>
               <details class="stage-edit-toggle">
                 <summary class="btn btn-small">Edit</summary>
-                <form method="POST" action="/projects/<%= project.id %>/todos/<%= t.id %>/edit" class="stage-edit-form">
+                <form method="POST" action="/projects/<%= project.id %>/todos/<%= t.id %>/edit" class="stage-edit-form postit-note">
                   <div class="form-group">
                     <label>Todo text</label>
                     <input type="text" name="text" value="<%= t.text %>" required>
