@@ -1,12 +1,57 @@
 const express = require('express');
+const session = require('express-session');
 const path = require('path');
 const db = require('./db');
 
 const app = express();
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+app.set('trust proxy', 1); // Railway sits behind a proxy that terminates TLS
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
+
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'change-me-in-railway-env-vars',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 30 * 24 * 60 * 60 * 1000 // stay logged in for 30 days
+  }
+}));
+
+// Password gate: everything except /login and static assets requires a session.
+app.use(function (req, res, next) {
+  if (req.path === '/login' || req.path.startsWith('/css') || req.path.startsWith('/js')) {
+    return next();
+  }
+  if (req.session && req.session.authenticated) {
+    return next();
+  }
+  res.redirect('/login');
+});
+
+app.get('/login', (req, res) => {
+  res.render('login', { error: null });
+});
+
+app.post('/login', (req, res) => {
+  const appPassword = process.env.APP_PASSWORD;
+  if (!appPassword) {
+    return res.render('login', { error: 'APP_PASSWORD is not set on the server. Add it in Railway environment variables.' });
+  }
+  if (req.body.password === appPassword) {
+    req.session.authenticated = true;
+    return res.redirect('/');
+  }
+  res.render('login', { error: 'Incorrect password.' });
+});
+
+app.post('/logout', (req, res) => {
+  req.session.destroy(function () {
+    res.redirect('/login');
+  });
+});
 
 function escapeHtml(str) {
   return String(str)
