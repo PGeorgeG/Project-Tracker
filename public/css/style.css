@@ -456,13 +456,20 @@ a:hover { text-decoration: underline; }
 
 /* ---- log ---- */
 .log-section { border-top: 1px solid var(--border); padding-top: 14px; margin-top: 1.75rem; }
-.log-row { display: flex; align-items: baseline; gap: 12px; padding: 7px 0; font-size: 13px; border-bottom: 1px solid var(--border); }
+.log-row { padding: 8px 0; font-size: 13px; border-bottom: 1px solid var(--border); }
+.log-row-head { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
 .log-date { color: var(--text-muted); width: 80px; flex-shrink: 0; font-size: 12px; }
-.log-text { color: var(--text-secondary); flex: 1; }
+.log-text { color: var(--text-secondary); }
 .log-pin { flex-shrink: 0; font-size: 13px; }
 .log-pin.off { color: var(--text-muted); opacity: .4; }
-.log-actions { display: flex; align-items: center; gap: 6px; }
+.log-actions { display: flex; align-items: center; gap: 6px; margin-left: auto; }
 .log-actions form { display: inline; }
+
+.rich-text p { margin: 0 0 8px; }
+.rich-text p:last-child { margin-bottom: 0; }
+.rich-text ul { margin: 0 0 8px; padding-left: 18px; }
+.rich-text ul:last-child { margin-bottom: 0; }
+.rich-text li { margin-bottom: 2px; }
 .note-edit-form { max-width: 420px; }
 
 /* ---- forms ---- */
