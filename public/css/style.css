@@ -249,6 +249,36 @@ a:hover { text-decoration: underline; }
   cursor: default;
 }
 
+.ticket-card {
+  background: #F3F8FD !important;
+  border: 1px solid #D3E3F2 !important;
+  box-shadow: 3px 5px 12px rgba(0,0,0,0.14), 0 1px 0 rgba(0,0,0,0.05);
+  transform: rotate(-1.5deg);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+}
+.ticket-card:focus-within {
+  transform: rotate(0deg);
+  box-shadow: 4px 7px 16px rgba(0,0,0,0.18), 0 1px 0 rgba(0,0,0,0.05);
+}
+.ticket-perforation {
+  position: relative;
+  border-top: 2px dashed #A9C6E0;
+  margin: 14px -24px 18px;
+}
+.ticket-perforation::before,
+.ticket-perforation::after {
+  content: '';
+  position: absolute;
+  top: -9px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--bg);
+}
+.ticket-perforation::before { left: -9px; }
+.ticket-perforation::after { right: -9px; }
+
 .postit-note {
   background: #FFF3A3 !important;
   border: none !important;
