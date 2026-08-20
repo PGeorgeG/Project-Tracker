@@ -250,7 +250,7 @@
         </form>
       </div>
 
-      <div class="card">
+      <div class="card postit-note todos-card">
         <p class="section-title">Todos</p>
         <% if (todos.length === 0) { %>
           <p class="empty-state">No todos yet.</p>
@@ -265,7 +265,7 @@
               <% if (t.due_date) { %><span class="muted"><%= t.due_date %></span><% } %>
               <details class="stage-edit-toggle">
                 <summary class="btn btn-small">Edit</summary>
-                <form method="POST" action="/projects/<%= project.id %>/todos/<%= t.id %>/edit" class="stage-edit-form postit-note">
+                <form method="POST" action="/projects/<%= project.id %>/todos/<%= t.id %>/edit" class="stage-edit-form">
                   <div class="form-group">
                     <label>Todo text</label>
                     <input type="text" name="text" value="<%= t.text %>" required>
