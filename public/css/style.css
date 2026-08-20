@@ -260,7 +260,6 @@ a:hover { text-decoration: underline; }
   margin: 10px 6px 18px !important;
   position: relative;
 }
-.postit-note:hover,
 .postit-note:focus-within {
   transform: rotate(0deg);
   box-shadow: 4px 7px 16px rgba(0,0,0,0.22), 0 1px 0 rgba(0,0,0,0.05);
