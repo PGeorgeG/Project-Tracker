@@ -41,9 +41,10 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!activeRow) return;
     const projectId = activeRow.dataset.projectId;
     const todoId = activeRow.dataset.todoId;
+    const kind = activeRow.dataset.type === 'alert' ? 'alerts' : 'todos';
     const form = document.createElement('form');
     form.method = 'POST';
-    form.action = '/projects/' + projectId + '/todos/' + todoId + path;
+    form.action = '/projects/' + projectId + '/' + kind + '/' + todoId + path;
     const redirectInput = document.createElement('input');
     redirectInput.type = 'hidden';
     redirectInput.name = 'redirect_to';
