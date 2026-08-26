@@ -50,6 +50,7 @@ CREATE TABLE IF NOT EXISTS alerts (
   note TEXT NOT NULL,
   trigger_date TEXT NOT NULL,
   dismissed INTEGER DEFAULT 0,
+  today_list_date TEXT DEFAULT NULL,
   created_at TEXT DEFAULT (datetime('now'))
 );
 
