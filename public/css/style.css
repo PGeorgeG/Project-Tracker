@@ -362,6 +362,34 @@ a:hover { text-decoration: underline; }
   line-height: 1;
 }
 .project-details[open] .summary-chevron { transform: rotate(90deg); }
+.alerts-summary {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  list-style: none;
+}
+.alerts-summary::-webkit-details-marker { display: none; }
+.alerts-details[open] .summary-chevron { transform: rotate(90deg); }
+.alerts-body { margin-top: 10px; }
+.today-alert-label {
+  font-size: 13px;
+  color: var(--text);
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.today-alert-tag {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--amber);
+  background: var(--amber-bg);
+  border-radius: 4px;
+  padding: 1px 5px;
+  flex-shrink: 0;
+}
 .project-body { padding-top: 1rem; cursor: pointer; }
 .open-project-link {
   display: inline-block;
