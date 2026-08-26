@@ -166,7 +166,13 @@
               <% globalAlerts.forEach(function(a) { %>
                 <% const onToday = a.today_list_date === todayStr; %>
                 <div class="global-todo-row global-alert-row" data-type="alert" data-project-id="<%= a.project_id %>" data-todo-id="<%= a.id %>" data-on-today="<%= onToday %>">
-                  <span class="global-todo-text"><%= a.note %></span>
+                  <form method="POST" action="/projects/<%= a.project_id %>/alerts/<%= a.id %>/dismiss">
+                    <input type="hidden" name="redirect_to" value="/">
+                    <label class="dismiss-alert-label">
+                      <input type="checkbox" onchange="this.form.submit()" title="Dismiss alert">
+                      <span class="global-todo-text"><%= a.note %></span>
+                    </label>
+                  </form>
                   <div class="global-todo-meta">
                     <span class="project-dot" style="background:<%= a.project_color %>;"></span>
                     <a href="/projects/<%= a.project_id %>"><%= a.project_name %></a>
