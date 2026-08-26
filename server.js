@@ -468,5 +468,18 @@ app.get('/report', (req, res) => {
   res.render('report', { reportData, start, end, totals });
 });
 
+// ---------- Completed todos ----------
+app.get('/completed-todos', (req, res) => {
+  const completedTodos = db.prepare(`
+    SELECT todos.*, projects.name AS project_name, projects.color AS project_color, projects.archived AS project_archived
+    FROM todos
+    JOIN projects ON projects.id = todos.project_id
+    WHERE todos.done = 1
+    ORDER BY todos.completed_at DESC, todos.id DESC
+  `).all();
+
+  res.render('completed-todos', { completedTodos });
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log('Project tracker running on port ' + PORT));
