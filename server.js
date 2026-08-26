@@ -164,6 +164,14 @@ app.get('/', (req, res) => {
     ORDER BY todos.id ASC
   `).all(todayStr);
 
+  const todayListAlerts = db.prepare(`
+    SELECT alerts.*, projects.name AS project_name, projects.color AS project_color
+    FROM alerts
+    JOIN projects ON projects.id = alerts.project_id
+    WHERE alerts.dismissed = 0 AND alerts.today_list_date = ? AND projects.archived = 0
+    ORDER BY alerts.id ASC
+  `).all(todayStr);
+
   const globalTodos = db.prepare(`
     SELECT todos.*, projects.name AS project_name, projects.color AS project_color
     FROM todos
@@ -172,7 +180,15 @@ app.get('/', (req, res) => {
     ORDER BY todos.due_date ASC
   `).all();
 
-  res.render('dashboard', { projects: projectData, showArchived, globalTodos, todayListTodos, todayStr, tomorrowStr });
+  const globalAlerts = db.prepare(`
+    SELECT alerts.*, projects.name AS project_name, projects.color AS project_color
+    FROM alerts
+    JOIN projects ON projects.id = alerts.project_id
+    WHERE alerts.dismissed = 0 AND projects.archived = 0
+    ORDER BY alerts.trigger_date ASC
+  `).all();
+
+  res.render('dashboard', { projects: projectData, showArchived, globalTodos, globalAlerts, todayListTodos, todayListAlerts, todayStr, tomorrowStr });
 });
 
 // ---------- Create project ----------
@@ -339,6 +355,17 @@ app.post('/projects/:id/alerts', (req, res) => {
 app.post('/projects/:id/alerts/:alertId/dismiss', (req, res) => {
   db.prepare('UPDATE alerts SET dismissed = 1 WHERE id=? AND project_id=?').run(req.params.alertId, req.params.id);
   res.redirect('/projects/' + req.params.id);
+});
+
+app.post('/projects/:id/alerts/:alertId/today', (req, res) => {
+  const today = new Date().toISOString().slice(0, 10);
+  db.prepare('UPDATE alerts SET today_list_date=? WHERE id=? AND project_id=?').run(today, req.params.alertId, req.params.id);
+  res.redirect((req.body && req.body.redirect_to) || ('/projects/' + req.params.id));
+});
+
+app.post('/projects/:id/alerts/:alertId/today/remove', (req, res) => {
+  db.prepare('UPDATE alerts SET today_list_date=NULL WHERE id=? AND project_id=?').run(req.params.alertId, req.params.id);
+  res.redirect((req.body && req.body.redirect_to) || ('/projects/' + req.params.id));
 });
 
 // ---------- Links ----------
