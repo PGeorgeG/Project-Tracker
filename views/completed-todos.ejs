@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Completed todos</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div>
+        <a href="/" style="font-size:13px;">&larr; All projects</a>
+        <h1 style="margin-top:4px;">Completed todos</h1>
+      </div>
+    </div>
+
+    <div class="card">
+      <p class="section-title">All completed todos — <%= completedTodos.length %> total</p>
+      <% if (completedTodos.length === 0) { %>
+        <p class="empty-state">Nothing completed yet.</p>
+      <% } %>
+      <% completedTodos.forEach(function(t) { %>
+        <div class="completed-todo-row">
+          <form method="POST" action="/projects/<%= t.project_id %>/todos/<%= t.id %>/toggle">
+            <input type="hidden" name="redirect_to" value="/completed-todos">
+            <label>
+              <input type="checkbox" checked onchange="this.form.submit()" title="Mark as not done">
+              <span class="completed-todo-text"><%= t.text %></span>
+            </label>
+          </form>
+          <div class="global-todo-meta">
+            <span class="project-dot" style="background:<%= t.project_color %>;"></span>
+            <a href="/projects/<%= t.project_id %>"><%= t.project_name %></a>
+            <% if (t.project_archived) { %><span class="badge badge-count">archived</span><% } %>
+            <span class="muted">— completed <%= t.completed_at ? t.completed_at.slice(0, 10) : 'unknown date' %></span>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+  </div>
+</body>
+</html>
