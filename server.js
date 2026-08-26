@@ -354,7 +354,7 @@ app.post('/projects/:id/alerts', (req, res) => {
 
 app.post('/projects/:id/alerts/:alertId/dismiss', (req, res) => {
   db.prepare('UPDATE alerts SET dismissed = 1 WHERE id=? AND project_id=?').run(req.params.alertId, req.params.id);
-  res.redirect('/projects/' + req.params.id);
+  res.redirect((req.body && req.body.redirect_to) || ('/projects/' + req.params.id));
 });
 
 app.post('/projects/:id/alerts/:alertId/today', (req, res) => {
