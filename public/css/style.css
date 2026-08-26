@@ -390,6 +390,20 @@ a:hover { text-decoration: underline; }
   padding: 1px 5px;
   flex-shrink: 0;
 }
+.dismiss-alert-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  cursor: pointer;
+  color: var(--text);
+}
+.dismiss-alert-label input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  margin-top: 1px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
 .project-body { padding-top: 1rem; cursor: pointer; }
 .open-project-link {
   display: inline-block;
