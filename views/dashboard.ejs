@@ -11,8 +11,14 @@
     <div class="topbar">
       <h1>Project tracker</h1>
       <div style="display:flex; gap:8px;">
-        <a class="btn" href="/report">Report</a>
-        <a class="btn" href="/?archived=<%= showArchived ? '0' : '1' %>"><%= showArchived ? 'Show active' : 'Show archived' %></a>
+        <div class="dropdown">
+          <button type="button" class="btn" id="moreMenuBtn">More &#9662;</button>
+          <div class="dropdown-menu" id="moreMenu" style="display:none;">
+            <a href="/report">Report</a>
+            <a href="/?archived=<%= showArchived ? '0' : '1' %>"><%= showArchived ? 'Show active' : 'Show archived' %></a>
+            <a href="/completed-todos">Completed todos</a>
+          </div>
+        </div>
         <a class="btn btn-primary" href="/projects/new">New project</a>
         <form method="POST" action="/logout" style="display:inline;">
           <button type="submit" class="btn btn-small">Log out</button>
@@ -237,5 +243,6 @@
   <script src="/js/timeline.js"></script>
   <script src="/js/today-list.js"></script>
   <script src="/js/quick-todo.js"></script>
+  <script src="/js/dropdown.js"></script>
 </body>
 </html>
