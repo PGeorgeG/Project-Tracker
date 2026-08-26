@@ -120,12 +120,12 @@
         <div class="card">
           <div style="display:flex; justify-content:space-between; align-items:center;">
             <p class="section-title" style="margin:0;">Today</p>
-            <% if (todayListTodos.length > 0) { %>
+            <% if (todayListTodos.length > 0 || todayListAlerts.length > 0) { %>
               <button type="button" class="btn btn-small" id="copyTodayListBtn">Copy list</button>
             <% } %>
           </div>
-          <% if (todayListTodos.length === 0) { %>
-            <p class="empty-state">Right-click (or tap &#8942;) a todo to add it here.</p>
+          <% if (todayListTodos.length === 0 && todayListAlerts.length === 0) { %>
+            <p class="empty-state">Right-click (or tap &#8942;) a todo or alert to add it here.</p>
           <% } %>
           <% todayListTodos.forEach(function(t) { %>
             <div class="today-list-row" data-todo-text="<%= t.text %>" data-project-name="<%= t.project_name %>">
@@ -142,6 +142,41 @@
               </form>
             </div>
           <% }); %>
+          <% todayListAlerts.forEach(function(a) { %>
+            <div class="today-list-row" data-todo-text="<%= a.note %>" data-project-name="<%= a.project_name %>">
+              <span class="today-alert-label"><span class="today-alert-tag">Alert</span> <%= a.note %></span>
+              <form method="POST" action="/projects/<%= a.project_id %>/alerts/<%= a.id %>/today/remove">
+                <input type="hidden" name="redirect_to" value="/">
+                <button type="submit" class="today-remove-btn" title="Remove from Today">&times;</button>
+              </form>
+            </div>
+          <% }); %>
+        </div>
+
+        <div class="card">
+          <details class="alerts-details">
+            <summary class="alerts-summary">
+              <span class="summary-chevron">&rsaquo;</span>
+              <p class="section-title" style="margin:0;">Alerts<% if (globalAlerts.length > 0) { %> (<%= globalAlerts.length %>)<% } %></p>
+            </summary>
+            <div class="alerts-body">
+              <% if (globalAlerts.length === 0) { %>
+                <p class="empty-state">No open alerts.</p>
+              <% } %>
+              <% globalAlerts.forEach(function(a) { %>
+                <% const onToday = a.today_list_date === todayStr; %>
+                <div class="global-todo-row global-alert-row" data-type="alert" data-project-id="<%= a.project_id %>" data-todo-id="<%= a.id %>" data-on-today="<%= onToday %>">
+                  <span class="global-todo-text"><%= a.note %></span>
+                  <div class="global-todo-meta">
+                    <span class="project-dot" style="background:<%= a.project_color %>;"></span>
+                    <a href="/projects/<%= a.project_id %>"><%= a.project_name %></a>
+                    <span class="muted">— <%= a.trigger_date %></span>
+                    <button type="button" class="row-kebab" title="More options">&#8942;</button>
+                  </div>
+                </div>
+              <% }); %>
+            </div>
+          </details>
         </div>
 
         <div class="card">
@@ -152,7 +187,7 @@
           <% globalTodos.forEach(function(t) { %>
             <% const urgency = todoUrgency(t.due_date); %>
             <% const onToday = t.today_list_date === todayStr; %>
-            <div class="global-todo-row" data-project-id="<%= t.project_id %>" data-todo-id="<%= t.id %>" data-on-today="<%= onToday %>">
+            <div class="global-todo-row" data-type="todo" data-project-id="<%= t.project_id %>" data-todo-id="<%= t.id %>" data-on-today="<%= onToday %>">
               <form method="POST" action="/projects/<%= t.project_id %>/todos/<%= t.id %>/toggle">
                 <input type="hidden" name="redirect_to" value="/">
                 <label class="<%= urgency === 'overdue' ? 'todo-overdue' : (urgency === 'soon' ? 'todo-soon' : '') %>">
