@@ -34,4 +34,9 @@ if (!todoCols.includes('today_list_date')) {
   db.exec('ALTER TABLE todos ADD COLUMN today_list_date TEXT DEFAULT NULL');
 }
 
+const alertCols = db.prepare("PRAGMA table_info(alerts)").all().map(c => c.name);
+if (!alertCols.includes('today_list_date')) {
+  db.exec('ALTER TABLE alerts ADD COLUMN today_list_date TEXT DEFAULT NULL');
+}
+
 module.exports = db;
