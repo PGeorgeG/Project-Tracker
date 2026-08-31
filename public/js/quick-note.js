@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   const form = document.getElementById('quickNoteForm');
   const input = document.getElementById('quickNoteInput');
+  const dateField = document.getElementById('quickNoteDate');
   const nameLabel = overlay.querySelector('.quick-todo-project-name');
   const cancelBtn = document.getElementById('quickNoteCancel');
 
@@ -11,6 +12,11 @@ document.addEventListener('DOMContentLoaded', function () {
     form.action = '/projects/' + projectId + '/notes';
     nameLabel.textContent = projectName;
     input.value = '';
+    // Stamp with the date at the moment the modal is opened, rather than
+    // when the dashboard page was originally loaded.
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    dateField.value = now.toISOString().slice(0, 10);
     overlay.style.display = 'flex';
     setTimeout(function () { input.focus(); }, 30);
   }

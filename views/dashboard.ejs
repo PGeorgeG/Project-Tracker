@@ -250,7 +250,9 @@
       <p class="quick-todo-project-name"></p>
       <form method="POST" id="quickNoteForm">
         <input type="hidden" name="redirect_to" value="/">
-        <input type="hidden" name="meeting_date" value="<%= todayStr %>">
+        <input type="hidden" name="meeting_date" id="quickNoteDate" value="<%= todayStr %>">
+        <input type="hidden" name="posted_on_timeline" value="on">
+        <input type="hidden" name="tone" value="green">
         <textarea name="text" id="quickNoteInput" class="quick-note-textarea" placeholder="Quick note from this meeting" required></textarea>
         <div class="quick-todo-actions">
           <button type="button" id="quickNoteCancel" class="btn btn-small">Cancel</button>
