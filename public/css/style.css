@@ -362,6 +362,19 @@ a:hover { text-decoration: underline; }
   transition: transform 0.15s ease;
   line-height: 1;
 }
+.project-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+  line-height: 1;
+}
 .project-details[open] .summary-chevron { transform: rotate(90deg); }
 .alerts-summary {
   display: flex;

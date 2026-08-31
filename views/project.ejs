@@ -77,9 +77,15 @@
               </select>
             </div>
           </div>
-          <div class="form-group">
-            <label>Dashboard color</label>
-            <input type="color" name="color" value="<%= project.color %>" style="width:60px; height:36px; padding:2px;">
+          <div class="form-row">
+            <div class="form-group" style="flex:0;">
+              <label>Dashboard color</label>
+              <input type="color" name="color" value="<%= project.color %>" style="width:60px; height:36px; padding:2px;">
+            </div>
+            <div class="form-group">
+              <label>Icon <span class="muted" style="font-weight:400;">— optional, e.g. an emoji like 🏫</span></label>
+              <input type="text" name="icon" value="<%= project.icon || '' %>" maxlength="8" placeholder="🏫" style="width:70px;">
+            </div>
           </div>
           <button type="submit" class="btn btn-primary btn-small">Save changes</button>
         </form>

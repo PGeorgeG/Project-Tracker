@@ -56,6 +56,7 @@
           <details class="project-details">
             <summary class="project-summary">
               <span class="summary-chevron">&rsaquo;</span>
+              <span class="project-badge" style="background:<%= p.color %>;"><%= p.icon || p.name.charAt(0).toUpperCase() %></span>
               <h2><%= p.name %></h2>
               <span class="proj-lead"><%= p.lead_name %></span>
               <% if (p.status_tag) { %>

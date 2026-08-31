@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS projects (
   status_tag TEXT DEFAULT '',
   cadence TEXT DEFAULT '',
   color TEXT DEFAULT '#378ADD',
+  icon TEXT DEFAULT NULL,
   archived INTEGER DEFAULT 0,
   sort_order INTEGER DEFAULT 0,
   created_at TEXT DEFAULT (datetime('now'))

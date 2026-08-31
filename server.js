@@ -197,15 +197,15 @@ app.get('/projects/new', (req, res) => {
 });
 
 app.post('/projects', (req, res) => {
-  const { name, outcome, lead_name, start_date, end_date, status_tag, cadence, color } = req.body;
+  const { name, outcome, lead_name, start_date, end_date, status_tag, cadence, color, icon } = req.body;
   if (!name || !outcome || !lead_name || !start_date || !end_date) {
     return res.status(400).send('Missing required fields');
   }
   const maxOrder = db.prepare('SELECT MAX(sort_order) m FROM projects').get().m;
   const nextOrder = (maxOrder === null ? -1 : maxOrder) + 1;
-  const stmt = db.prepare(`INSERT INTO projects (name, outcome, lead_name, start_date, end_date, status_tag, cadence, color, sort_order)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`);
-  const info = stmt.run(name, outcome, lead_name, start_date, end_date, status_tag || '', cadence || '', color || '#378ADD', nextOrder);
+  const stmt = db.prepare(`INSERT INTO projects (name, outcome, lead_name, start_date, end_date, status_tag, cadence, color, icon, sort_order)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
+  const info = stmt.run(name, outcome, lead_name, start_date, end_date, status_tag || '', cadence || '', color || '#378ADD', (icon || '').trim() || null, nextOrder);
   res.redirect('/projects/' + info.lastInsertRowid);
 });
 
@@ -227,9 +227,9 @@ app.get('/projects/:id', (req, res) => {
 });
 
 app.post('/projects/:id/edit', (req, res) => {
-  const { name, outcome, lead_name, start_date, end_date, status_tag, cadence, color } = req.body;
-  db.prepare(`UPDATE projects SET name=?, outcome=?, lead_name=?, start_date=?, end_date=?, status_tag=?, cadence=?, color=? WHERE id=?`)
-    .run(name, outcome, lead_name, start_date, end_date, status_tag || '', cadence || '', color || '#378ADD', req.params.id);
+  const { name, outcome, lead_name, start_date, end_date, status_tag, cadence, color, icon } = req.body;
+  db.prepare(`UPDATE projects SET name=?, outcome=?, lead_name=?, start_date=?, end_date=?, status_tag=?, cadence=?, color=?, icon=? WHERE id=?`)
+    .run(name, outcome, lead_name, start_date, end_date, status_tag || '', cadence || '', color || '#378ADD', (icon || '').trim() || null, req.params.id);
   res.redirect('/projects/' + req.params.id);
 });
 

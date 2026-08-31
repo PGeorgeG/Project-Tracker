@@ -23,6 +23,9 @@ if (!projectCols.includes('sort_order')) {
   const setOrder = db.prepare('UPDATE projects SET sort_order = ? WHERE id = ?');
   rows.forEach((row, i) => setOrder.run(i, row.id));
 }
+if (!projectCols.includes('icon')) {
+  db.exec('ALTER TABLE projects ADD COLUMN icon TEXT DEFAULT NULL');
+}
 
 const todoCols = db.prepare("PRAGMA table_info(todos)").all().map(c => c.name);
 if (!todoCols.includes('completed_at')) {
