@@ -399,44 +399,51 @@ app.post('/projects/:id/links/:linkId/delete', (req, res) => {
 // ---------- Search ----------
 // Escapes LIKE wildcards in user input so a literal % or _ in the query
 // isn't treated as a wildcard, then wraps it for a substring match.
-function likeParam(q) {
-  return '%' + q.replace(/[\\%_]/g, '\\$&') + '%';
+function likeParam(term) {
+  return '%' + term.replace(/[\\%_]/g, '\\$&') + '%';
+}
+
+// Builds "field LIKE ? ESCAPE '\' AND field LIKE ? ESCAPE '\' AND ..." (one
+// clause per term) so a multi-word query requires every term to appear,
+// in any order — a simple implicit-AND search.
+function allTermsClause(field, terms) {
+  return terms.map(() => `${field} LIKE ? ESCAPE '\\'`).join(' AND ');
 }
 
 app.get('/search', (req, res) => {
   const q = (req.query.q || '').trim();
+  const terms = q.split(/\s+/).filter(Boolean);
+  const params = terms.map(likeParam);
   let todos = [], alerts = [], notes = [], links = [];
 
-  if (q) {
-    const like = likeParam(q);
-
+  if (terms.length > 0) {
     todos = db.prepare(`
       SELECT todos.*, projects.name AS project_name, projects.color AS project_color, projects.archived AS project_archived
       FROM todos JOIN projects ON projects.id = todos.project_id
-      WHERE todos.text LIKE ? ESCAPE '\\'
+      WHERE ${allTermsClause('todos.text', terms)}
       ORDER BY todos.done ASC, todos.due_date ASC
-    `).all(like);
+    `).all(params);
 
     alerts = db.prepare(`
       SELECT alerts.*, projects.name AS project_name, projects.color AS project_color, projects.archived AS project_archived
       FROM alerts JOIN projects ON projects.id = alerts.project_id
-      WHERE alerts.note LIKE ? ESCAPE '\\'
+      WHERE ${allTermsClause('alerts.note', terms)}
       ORDER BY alerts.dismissed ASC, alerts.trigger_date ASC
-    `).all(like);
+    `).all(params);
 
     notes = db.prepare(`
       SELECT notes.*, projects.name AS project_name, projects.color AS project_color, projects.archived AS project_archived
       FROM notes JOIN projects ON projects.id = notes.project_id
-      WHERE notes.text LIKE ? ESCAPE '\\'
+      WHERE ${allTermsClause('notes.text', terms)}
       ORDER BY notes.meeting_date DESC
-    `).all(like);
+    `).all(params);
 
     links = db.prepare(`
       SELECT links.*, projects.name AS project_name, projects.color AS project_color, projects.archived AS project_archived
       FROM links JOIN projects ON projects.id = links.project_id
-      WHERE links.description LIKE ? ESCAPE '\\'
+      WHERE ${allTermsClause('links.description', terms)}
       ORDER BY links.created_at DESC
-    `).all(like);
+    `).all(params);
   }
 
   res.render('search', { q, todos, alerts, notes, links });
