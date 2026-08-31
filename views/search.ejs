@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Search &mdash; Project tracker</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div>
+        <a href="/" style="font-size:13px;">&larr; All projects</a>
+        <h1 style="margin-top:4px;">Search</h1>
+      </div>
+    </div>
+
+    <div class="card">
+      <form method="GET" action="/search" class="form-row" style="align-items:flex-end;">
+        <div class="form-group" style="flex:1;">
+          <label>Todos, alerts, notes &amp; link descriptions</label>
+          <input type="text" name="q" value="<%= q %>" placeholder="Search everything&hellip;" autofocus>
+        </div>
+        <div class="form-group" style="flex:0;">
+          <button type="submit" class="btn btn-primary">Search</button>
+        </div>
+      </form>
+    </div>
+
+    <% if (!q) { %>
+      <div class="card">
+        <p class="empty-state">Enter a search term to look across every project's todos, alerts, meeting notes, and related link descriptions.</p>
+      </div>
+    <% } else if (todos.length === 0 && alerts.length === 0 && notes.length === 0 && links.length === 0) { %>
+      <div class="card">
+        <p class="empty-state">No matches for &ldquo;<%= q %>&rdquo;.</p>
+      </div>
+    <% } else { %>
+
+      <% if (todos.length > 0) { %>
+        <div class="card">
+          <p class="section-title">Todos (<%= todos.length %>)</p>
+          <ul class="report-list">
+            <% todos.forEach(function(t) { %>
+              <li>
+                <% if (t.done) { %><span class="muted" style="text-decoration:line-through;"><%= t.text %></span><% } else { %><%= t.text %><% } %>
+                <% if (t.due_date) { %> <span class="muted">&mdash; due <%= t.due_date %></span><% } %>
+                <span class="muted">&mdash;</span>
+                <span class="project-dot" style="background:<%= t.project_color %>;"></span>
+                <a href="/projects/<%= t.project_id %>"><%= t.project_name %></a><% if (t.project_archived) { %> <span class="muted">(archived)</span><% } %>
+              </li>
+            <% }); %>
+          </ul>
+        </div>
+      <% } %>
+
+      <% if (alerts.length > 0) { %>
+        <div class="card">
+          <p class="section-title">Alerts (<%= alerts.length %>)</p>
+          <ul class="report-list">
+            <% alerts.forEach(function(a) { %>
+              <li>
+                <% if (a.dismissed) { %><span class="muted" style="text-decoration:line-through;"><%= a.note %></span><% } else { %><%= a.note %><% } %>
+                <span class="muted">&mdash; <%= a.trigger_date %> &mdash;</span>
+                <span class="project-dot" style="background:<%= a.project_color %>;"></span>
+                <a href="/projects/<%= a.project_id %>"><%= a.project_name %></a><% if (a.project_archived) { %> <span class="muted">(archived)</span><% } %>
+              </li>
+            <% }); %>
+          </ul>
+        </div>
+      <% } %>
+
+      <% if (notes.length > 0) { %>
+        <div class="card">
+          <p class="section-title">Meeting notes (<%= notes.length %>)</p>
+          <ul class="report-list">
+            <% notes.forEach(function(n) { %>
+              <li>
+                <span class="muted"><%= n.meeting_date %> &mdash;</span> <%= n.text %>
+                <span class="muted">&mdash;</span>
+                <span class="project-dot" style="background:<%= n.project_color %>;"></span>
+                <a href="/projects/<%= n.project_id %>"><%= n.project_name %></a><% if (n.project_archived) { %> <span class="muted">(archived)</span><% } %>
+              </li>
+            <% }); %>
+          </ul>
+        </div>
+      <% } %>
+
+      <% if (links.length > 0) { %>
+        <div class="card">
+          <p class="section-title">Related links (<%= links.length %>)</p>
+          <ul class="report-list">
+            <% links.forEach(function(l) { %>
+              <li>
+                <a href="<%= l.url %>" target="_blank" rel="noopener noreferrer"><%= l.description %></a>
+                <span class="muted">&mdash;</span>
+                <span class="project-dot" style="background:<%= l.project_color %>;"></span>
+                <a href="/projects/<%= l.project_id %>"><%= l.project_name %></a><% if (l.project_archived) { %> <span class="muted">(archived)</span><% } %>
+              </li>
+            <% }); %>
+          </ul>
+        </div>
+      <% } %>
+
+    <% } %>
+  </div>
+</body>
+</html>

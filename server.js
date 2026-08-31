@@ -396,6 +396,52 @@ app.post('/projects/:id/links/:linkId/delete', (req, res) => {
   res.redirect('/projects/' + req.params.id);
 });
 
+// ---------- Search ----------
+// Escapes LIKE wildcards in user input so a literal % or _ in the query
+// isn't treated as a wildcard, then wraps it for a substring match.
+function likeParam(q) {
+  return '%' + q.replace(/[\\%_]/g, '\\$&') + '%';
+}
+
+app.get('/search', (req, res) => {
+  const q = (req.query.q || '').trim();
+  let todos = [], alerts = [], notes = [], links = [];
+
+  if (q) {
+    const like = likeParam(q);
+
+    todos = db.prepare(`
+      SELECT todos.*, projects.name AS project_name, projects.color AS project_color, projects.archived AS project_archived
+      FROM todos JOIN projects ON projects.id = todos.project_id
+      WHERE todos.text LIKE ? ESCAPE '\\'
+      ORDER BY todos.done ASC, todos.due_date ASC
+    `).all(like);
+
+    alerts = db.prepare(`
+      SELECT alerts.*, projects.name AS project_name, projects.color AS project_color, projects.archived AS project_archived
+      FROM alerts JOIN projects ON projects.id = alerts.project_id
+      WHERE alerts.note LIKE ? ESCAPE '\\'
+      ORDER BY alerts.dismissed ASC, alerts.trigger_date ASC
+    `).all(like);
+
+    notes = db.prepare(`
+      SELECT notes.*, projects.name AS project_name, projects.color AS project_color, projects.archived AS project_archived
+      FROM notes JOIN projects ON projects.id = notes.project_id
+      WHERE notes.text LIKE ? ESCAPE '\\'
+      ORDER BY notes.meeting_date DESC
+    `).all(like);
+
+    links = db.prepare(`
+      SELECT links.*, projects.name AS project_name, projects.color AS project_color, projects.archived AS project_archived
+      FROM links JOIN projects ON projects.id = links.project_id
+      WHERE links.description LIKE ? ESCAPE '\\'
+      ORDER BY links.created_at DESC
+    `).all(like);
+  }
+
+  res.render('search', { q, todos, alerts, notes, links });
+});
+
 // ---------- Report ----------
 app.get('/report', (req, res) => {
   const today = new Date();
