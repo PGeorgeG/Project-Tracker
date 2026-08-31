@@ -53,6 +53,7 @@
             </form>
           </div>
           <button type="button" class="btn btn-small quick-todo-btn" data-project-id="<%= p.id %>" data-project-name="<%= p.name %>" title="Quick add a todo">+ Todo</button>
+          <button type="button" class="btn btn-small quick-note-btn" data-project-id="<%= p.id %>" data-project-name="<%= p.name %>" title="Quick add a note">+ Note</button>
           <details class="project-details">
             <summary class="project-summary">
               <span class="summary-chevron">&rsaquo;</span>
@@ -244,9 +245,25 @@
     </div>
   </div>
 
+  <div id="quickNoteModal" class="quick-todo-overlay" style="display:none;">
+    <div class="quick-todo-box quick-note-box">
+      <p class="quick-todo-project-name"></p>
+      <form method="POST" id="quickNoteForm">
+        <input type="hidden" name="redirect_to" value="/">
+        <input type="hidden" name="meeting_date" value="<%= todayStr %>">
+        <textarea name="text" id="quickNoteInput" class="quick-note-textarea" placeholder="Quick note from this meeting" required></textarea>
+        <div class="quick-todo-actions">
+          <button type="button" id="quickNoteCancel" class="btn btn-small">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-small">Add</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script src="/js/timeline.js"></script>
   <script src="/js/today-list.js"></script>
   <script src="/js/quick-todo.js"></script>
+  <script src="/js/quick-note.js"></script>
   <script src="/js/dropdown.js"></script>
 </body>
 </html>

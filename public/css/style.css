@@ -98,6 +98,13 @@ a:hover { text-decoration: underline; }
   font-size: 15px;
   padding: 10px 12px;
 }
+.quick-note-box { max-width: 480px; }
+.quick-note-textarea {
+  font-size: 15px;
+  padding: 10px 12px;
+  height: 200px;
+  overflow-y: auto;
+}
 .quick-todo-actions {
   display: flex;
   justify-content: flex-end;
