@@ -224,6 +224,7 @@ a:hover { text-decoration: underline; }
 .btn-primary:hover { opacity: 0.9; background: var(--accent); }
 .btn-small { padding: 4px 10px; font-size: 12px; }
 .btn-danger { color: var(--red); border-color: var(--red); }
+.btn-icon { display: inline-flex; align-items: center; justify-content: center; padding: 8px; line-height: 0; }
 
 .card {
   background: var(--surface);
