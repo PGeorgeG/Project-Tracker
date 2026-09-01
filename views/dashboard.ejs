@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Project tracker</title>
+  <title>Project Tracker</title>
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
   <div class="wrap wrap-wide">
     <div class="topbar">
-      <h1>Project tracker</h1>
+      <h1>Project Tracker</h1>
       <div style="display:flex; gap:8px;">
         <a class="btn btn-icon" href="/search" title="Search" aria-label="Search">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
@@ -52,8 +52,10 @@
               <button type="submit" class="btn btn-small" <%= idx === projects.length - 1 ? 'disabled' : '' %> title="Move down">&darr;</button>
             </form>
           </div>
-          <button type="button" class="btn btn-small quick-todo-btn" data-project-id="<%= p.id %>" data-project-name="<%= p.name %>" title="Quick add a todo">+ Todo</button>
-          <button type="button" class="btn btn-small quick-note-btn" data-project-id="<%= p.id %>" data-project-name="<%= p.name %>" title="Quick add a note">+ Note</button>
+          <div class="quick-add-buttons">
+            <button type="button" class="btn btn-small quick-todo-btn" data-project-id="<%= p.id %>" data-project-name="<%= p.name %>" title="Quick add a todo">+ Todo</button>
+            <button type="button" class="btn btn-small quick-note-btn" data-project-id="<%= p.id %>" data-project-name="<%= p.name %>" title="Quick add a note">+ Note</button>
+          </div>
           <details class="project-details">
             <summary class="project-summary">
               <span class="summary-chevron">&rsaquo;</span>
