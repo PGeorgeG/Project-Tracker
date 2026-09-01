@@ -391,6 +391,16 @@ app.post('/projects/:id/links', (req, res) => {
   res.redirect('/projects/' + req.params.id);
 });
 
+app.post('/projects/:id/links/:linkId/edit', (req, res) => {
+  let { description, url } = req.body;
+  if (!url) return res.redirect('/projects/' + req.params.id);
+  if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+  if (!description || !description.trim()) description = guessDescriptionFromUrl(url);
+  db.prepare('UPDATE links SET description=?, url=? WHERE id=? AND project_id=?')
+    .run(description.trim(), url, req.params.linkId, req.params.id);
+  res.redirect('/projects/' + req.params.id);
+});
+
 app.post('/projects/:id/links/:linkId/delete', (req, res) => {
   db.prepare('DELETE FROM links WHERE id=? AND project_id=?').run(req.params.linkId, req.params.id);
   res.redirect('/projects/' + req.params.id);

@@ -142,10 +142,18 @@ function renderTimeline(container) {
   if (interactive) {
     wrap.addEventListener('click', function (e) {
       if (e.target.closest('.note-cluster')) return;
-      const log = document.getElementById('logSection');
-      if (log) log.style.display = log.style.display === 'none' ? 'block' : 'none';
+      toggleLogSection();
     });
   }
+}
+
+function toggleLogSection(forceOpen) {
+  const log = document.getElementById('logSection');
+  if (!log) return;
+  const opening = typeof forceOpen === 'boolean' ? forceOpen : log.style.display === 'none';
+  log.style.display = opening ? 'block' : 'none';
+  const btn = document.getElementById('toggleLogBtn');
+  if (btn) btn.textContent = opening ? 'Hide meeting log' : 'See all notes';
 }
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -162,5 +170,10 @@ document.addEventListener('DOMContentLoaded', function () {
     postToggle.addEventListener('change', function (e) {
       document.getElementById('toneRow').style.display = e.target.checked ? 'flex' : 'none';
     });
+  }
+
+  const toggleLogBtn = document.getElementById('toggleLogBtn');
+  if (toggleLogBtn) {
+    toggleLogBtn.addEventListener('click', function () { toggleLogSection(); });
   }
 });

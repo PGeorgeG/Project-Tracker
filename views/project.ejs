@@ -99,7 +99,10 @@
         <span><span class="legend-diamond tone-amber"></span>Warning</span>
         <span><span class="legend-diamond tone-green"></span>All good</span>
       </div>
-      <p class="muted" style="font-size:12px; margin:0 0 0.5rem;">Click the timeline to open the full meeting log below.</p>
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin:0 0 0.5rem;">
+        <p class="muted" style="font-size:12px; margin:0;">Click the timeline, or use the button, to open the full meeting log.</p>
+        <button type="button" class="btn btn-small" id="toggleLogBtn">See all notes</button>
+      </div>
 
       <% if (stages.length > 0) { %>
         <div class="timeline-mount" data-interactive="true" style="margin-bottom:2rem; --accent: <%= project.color %>;">
@@ -343,6 +346,20 @@
       <% links.forEach(function(l) { %>
         <div class="link-row">
           <a class="grow" href="<%= l.url %>" target="_blank" rel="noopener noreferrer"><%= l.description %></a>
+          <details class="stage-edit-toggle">
+            <summary class="btn btn-small">Edit</summary>
+            <form method="POST" action="/projects/<%= project.id %>/links/<%= l.id %>/edit" class="stage-edit-form">
+              <div class="form-group">
+                <label>Description <span class="muted" style="font-weight:400;">— leave blank to use the filename</span></label>
+                <input type="text" name="description" value="<%= l.description %>">
+              </div>
+              <div class="form-group">
+                <label>Link</label>
+                <input type="text" name="url" value="<%= l.url %>" required>
+              </div>
+              <button type="submit" class="btn btn-primary btn-small">Save link</button>
+            </form>
+          </details>
           <form method="POST" action="/projects/<%= project.id %>/links/<%= l.id %>/delete">
             <button type="submit" class="btn btn-small">Delete</button>
           </form>
