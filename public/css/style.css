@@ -708,10 +708,22 @@ textarea { min-height: 70px; resize: vertical; }
 @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
 
 /* ---- board ---- */
-.board-scroll {
-  overflow: auto;
+.board-layout {
+  display: flex;
+  align-items: stretch;
   height: calc(100vh - 110px);
   border-top: 1px solid var(--border);
+}
+.board-sidebar {
+  width: 280px;
+  flex-shrink: 0;
+  padding: 1rem;
+  overflow-y: auto;
+  border-right: 1px solid var(--border);
+}
+.board-scroll {
+  flex: 1;
+  overflow: auto;
   background: var(--bg);
 }
 .board-canvas {

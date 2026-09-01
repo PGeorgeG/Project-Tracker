@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function () {
     activeRow = null;
   }
 
-  document.querySelectorAll('.global-todo-row').forEach(function (row) {
+  document.querySelectorAll('.global-todo-row, .postit').forEach(function (row) {
     row.addEventListener('contextmenu', function (e) {
       e.preventDefault();
       showMenu(e.clientX, e.clientY, row);
@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const redirectInput = document.createElement('input');
     redirectInput.type = 'hidden';
     redirectInput.name = 'redirect_to';
-    redirectInput.value = '/';
+    redirectInput.value = window.location.pathname;
     form.appendChild(redirectInput);
     document.body.appendChild(form);
     form.submit();

@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', function () {
     let startX, startY, origLeft, origTop;
 
     note.addEventListener('pointerdown', function (e) {
+      if (e.button !== 0) return; // right-click opens the context menu instead
       if (e.target.closest('.postit-no-drag')) return;
       dragging = true;
       moved = false;

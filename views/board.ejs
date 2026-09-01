@@ -14,33 +14,80 @@
         <h1 style="margin-top:4px;">Board</h1>
       </div>
     </div>
-    <p class="muted" style="font-size:12px; margin:-0.5rem 0 0;">Drag notes anywhere — their spot is remembered. Check one off to pull it off the board.</p>
+    <p class="muted" style="font-size:12px; margin:-0.5rem 0 0;">Drag notes anywhere — their spot is remembered. Right-click a note to pin it to Today's List. Check one off to pull it off the board.</p>
   </div>
 
-  <div class="board-scroll">
-    <div class="board-canvas" id="boardCanvas">
-      <% if (todos.length === 0) { %>
-        <p class="empty-state" style="position:absolute; top:30px; left:30px;">Nothing open right now — new todos will show up here as sticky notes.</p>
-      <% } %>
-      <% todos.forEach(function(t) { %>
-        <% const urgency = todoUrgency(t.due_date); %>
-        <% const rot = ((t.id * 37) % 7) - 3; %>
-        <div class="postit" data-todo-id="<%= t.id %>" style="left:<%= t.board_x %>px; top:<%= t.board_y %>px; transform: rotate(<%= rot %>deg); background: <%= t.project_color %>2b;">
-          <div class="postit-top">
-            <a class="postit-project postit-no-drag" href="/projects/<%= t.project_id %>" style="background:<%= t.project_color %>;" title="Open <%= t.project_name %>"><%= t.project_name %></a>
-            <form method="POST" action="/projects/<%= t.project_id %>/todos/<%= t.id %>/toggle" class="postit-toggle-form postit-no-drag">
-              <button type="submit" class="postit-check" title="Mark done">&#10003;</button>
-            </form>
-          </div>
-          <div class="postit-text"><%= t.text %></div>
-          <% if (t.due_date) { %>
-            <div class="postit-due <%= urgency === 'overdue' ? 'todo-overdue' : (urgency === 'soon' ? 'todo-soon' : '') %>"><%= t.due_date %></div>
+  <div class="board-layout">
+    <aside class="board-sidebar">
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <p class="section-title" style="margin:0;">Today's List</p>
+          <% if (todayListTodos.length > 0 || todayListAlerts.length > 0) { %>
+            <button type="button" class="btn btn-small" id="copyTodayListBtn">Copy list</button>
           <% } %>
         </div>
-      <% }); %>
+        <% if (todayListTodos.length === 0 && todayListAlerts.length === 0) { %>
+          <p class="empty-state">Right-click a note to add it here.</p>
+        <% } %>
+        <% todayListTodos.forEach(function(t) { %>
+          <div class="today-list-row" data-todo-text="<%= t.text %>" data-project-name="<%= t.project_name %>">
+            <form method="POST" action="/projects/<%= t.project_id %>/todos/<%= t.id %>/toggle" style="display:inline;">
+              <input type="hidden" name="redirect_to" value="/board">
+              <label>
+                <input type="checkbox" onchange="this.form.submit()">
+                <span><%= t.text %></span>
+              </label>
+            </form>
+            <form method="POST" action="/projects/<%= t.project_id %>/todos/<%= t.id %>/today/remove">
+              <input type="hidden" name="redirect_to" value="/board">
+              <button type="submit" class="today-remove-btn" title="Remove from Today">&times;</button>
+            </form>
+          </div>
+        <% }); %>
+        <% todayListAlerts.forEach(function(a) { %>
+          <div class="today-list-row" data-todo-text="<%= a.note %>" data-project-name="<%= a.project_name %>">
+            <span class="today-alert-label"><span class="today-alert-tag">Alert</span> <%= a.note %></span>
+            <form method="POST" action="/projects/<%= a.project_id %>/alerts/<%= a.id %>/today/remove">
+              <input type="hidden" name="redirect_to" value="/board">
+              <button type="submit" class="today-remove-btn" title="Remove from Today">&times;</button>
+            </form>
+          </div>
+        <% }); %>
+      </div>
+    </aside>
+
+    <div class="board-scroll">
+      <div class="board-canvas" id="boardCanvas">
+        <% if (todos.length === 0) { %>
+          <p class="empty-state" style="position:absolute; top:30px; left:30px;">Nothing open right now — new todos will show up here as sticky notes.</p>
+        <% } %>
+        <% todos.forEach(function(t) { %>
+          <% const urgency = todoUrgency(t.due_date); %>
+          <% const rot = ((t.id * 37) % 7) - 3; %>
+          <% const onToday = t.today_list_date === todayStr; %>
+          <div class="postit" data-todo-id="<%= t.id %>" data-project-id="<%= t.project_id %>" data-type="todo" data-on-today="<%= onToday %>" style="left:<%= t.board_x %>px; top:<%= t.board_y %>px; transform: rotate(<%= rot %>deg); background: <%= t.project_color %>2b;">
+            <div class="postit-top">
+              <a class="postit-project postit-no-drag" href="/projects/<%= t.project_id %>" style="background:<%= t.project_color %>;" title="Open <%= t.project_name %>"><%= t.project_name %></a>
+              <form method="POST" action="/projects/<%= t.project_id %>/todos/<%= t.id %>/toggle" class="postit-toggle-form postit-no-drag">
+                <button type="submit" class="postit-check" title="Mark done">&#10003;</button>
+              </form>
+            </div>
+            <div class="postit-text"><%= t.text %></div>
+            <% if (t.due_date) { %>
+              <div class="postit-due <%= urgency === 'overdue' ? 'todo-overdue' : (urgency === 'soon' ? 'todo-soon' : '') %>"><%= t.due_date %></div>
+            <% } %>
+          </div>
+        <% }); %>
+      </div>
     </div>
   </div>
 
+  <div id="todoContextMenu" class="context-menu" style="display:none;">
+    <button type="button" id="ctxAddToday">Add to Today List</button>
+    <button type="button" id="ctxRemoveToday">Remove from Today List</button>
+  </div>
+
   <script src="/js/board.js"></script>
+  <script src="/js/today-list.js"></script>
 </body>
 </html>

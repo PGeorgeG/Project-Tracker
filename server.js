@@ -135,26 +135,10 @@ function getProject(id) {
   return db.prepare('SELECT * FROM projects WHERE id = ?').get(id);
 }
 
-// ---------- Dashboard ----------
-app.get('/', (req, res) => {
-  const showArchived = req.query.archived === '1';
-  const projects = db.prepare(
-    `SELECT * FROM projects WHERE archived = ? ORDER BY sort_order ASC, created_at ASC`
-  ).all(showArchived ? 1 : 0);
-
-  const projectData = projects.map(p => {
-    const stages = db.prepare('SELECT * FROM stages WHERE project_id = ? ORDER BY target_date ASC').all(p.id);
-    const notes = db.prepare('SELECT * FROM notes WHERE project_id = ? ORDER BY meeting_date ASC').all(p.id);
-    const openAlerts = db.prepare('SELECT COUNT(*) c FROM alerts WHERE project_id = ? AND dismissed = 0').get(p.id).c;
-    const openTodos = db.prepare('SELECT * FROM todos WHERE project_id = ? AND done = 0 ORDER BY due_date ASC').all(p.id);
-    const links = db.prepare('SELECT * FROM links WHERE project_id = ? ORDER BY created_at ASC').all(p.id);
-    return { ...p, stages, notes, openAlerts, openTodos, links };
-  });
-
+// Shared by the dashboard and the board page, so "Today's List" is always
+// the same set of pinned todos/alerts regardless of which page pinned them.
+function getTodayList() {
   const todayStr = new Date().toISOString().slice(0, 10);
-  const tomorrowDate = new Date();
-  tomorrowDate.setDate(tomorrowDate.getDate() + 1);
-  const tomorrowStr = tomorrowDate.toISOString().slice(0, 10);
 
   const todayListTodos = db.prepare(`
     SELECT todos.*, projects.name AS project_name, projects.color AS project_color
@@ -171,6 +155,31 @@ app.get('/', (req, res) => {
     WHERE alerts.dismissed = 0 AND alerts.today_list_date = ? AND projects.archived = 0
     ORDER BY alerts.id ASC
   `).all(todayStr);
+
+  return { todayStr, todayListTodos, todayListAlerts };
+}
+
+// ---------- Dashboard ----------
+app.get('/', (req, res) => {
+  const showArchived = req.query.archived === '1';
+  const projects = db.prepare(
+    `SELECT * FROM projects WHERE archived = ? ORDER BY sort_order ASC, created_at ASC`
+  ).all(showArchived ? 1 : 0);
+
+  const projectData = projects.map(p => {
+    const stages = db.prepare('SELECT * FROM stages WHERE project_id = ? ORDER BY target_date ASC').all(p.id);
+    const notes = db.prepare('SELECT * FROM notes WHERE project_id = ? ORDER BY meeting_date ASC').all(p.id);
+    const openAlerts = db.prepare('SELECT COUNT(*) c FROM alerts WHERE project_id = ? AND dismissed = 0').get(p.id).c;
+    const openTodos = db.prepare('SELECT * FROM todos WHERE project_id = ? AND done = 0 ORDER BY due_date ASC').all(p.id);
+    const links = db.prepare('SELECT * FROM links WHERE project_id = ? ORDER BY created_at ASC').all(p.id);
+    return { ...p, stages, notes, openAlerts, openTodos, links };
+  });
+
+  const tomorrowDate = new Date();
+  tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+  const tomorrowStr = tomorrowDate.toISOString().slice(0, 10);
+
+  const { todayStr, todayListTodos, todayListAlerts } = getTodayList();
 
   const globalTodos = db.prepare(`
     SELECT todos.*, projects.name AS project_name, projects.color AS project_color
@@ -565,7 +574,9 @@ app.get('/board', (req, res) => {
     }
   });
 
-  res.render('board', { todos });
+  const { todayStr, todayListTodos, todayListAlerts } = getTodayList();
+
+  res.render('board', { todos, todayStr, todayListTodos, todayListAlerts });
 });
 
 app.post('/todos/:id/position', (req, res) => {
