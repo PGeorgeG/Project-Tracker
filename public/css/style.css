@@ -374,12 +374,13 @@ a:hover { text-decoration: underline; }
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 30px;
-  height: 30px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  font-size: 15px;
+  border: 1.5px solid;
+  background: var(--surface);
+  font-size: 22px;
   font-weight: 600;
-  color: #fff;
   line-height: 1;
 }
 .project-details[open] .summary-chevron { transform: rotate(90deg); }
