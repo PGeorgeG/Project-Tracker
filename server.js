@@ -544,5 +544,37 @@ app.get('/completed-todos', (req, res) => {
   res.render('completed-todos', { completedTodos });
 });
 
+// ---------- Board ----------
+// New todos with no saved position yet fan out from the top-left corner,
+// like a fresh stack of sticky notes waiting to be spread out by hand.
+app.get('/board', (req, res) => {
+  const todos = db.prepare(`
+    SELECT todos.*, projects.name AS project_name, projects.color AS project_color
+    FROM todos
+    JOIN projects ON projects.id = todos.project_id
+    WHERE todos.done = 0 AND projects.archived = 0
+    ORDER BY todos.created_at ASC
+  `).all();
+
+  let unpositioned = 0;
+  todos.forEach(t => {
+    if (t.board_x === null || t.board_y === null) {
+      const n = unpositioned++;
+      t.board_x = 30 + (n % 12) * 26;
+      t.board_y = 30 + (n % 12) * 22;
+    }
+  });
+
+  res.render('board', { todos });
+});
+
+app.post('/todos/:id/position', (req, res) => {
+  const x = parseInt(req.body.x, 10);
+  const y = parseInt(req.body.y, 10);
+  if (Number.isNaN(x) || Number.isNaN(y)) return res.sendStatus(400);
+  db.prepare('UPDATE todos SET board_x = ?, board_y = ? WHERE id = ?').run(x, y, req.params.id);
+  res.sendStatus(204);
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log('Project tracker running on port ' + PORT));

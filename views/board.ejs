@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Board — Project Tracker</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="wrap wrap-wide" style="padding-bottom:0.5rem;">
+    <div class="topbar">
+      <div>
+        <a href="/" style="font-size:13px;">&larr; All projects</a>
+        <h1 style="margin-top:4px;">Board</h1>
+      </div>
+    </div>
+    <p class="muted" style="font-size:12px; margin:-0.5rem 0 0;">Drag notes anywhere — their spot is remembered. Check one off to pull it off the board.</p>
+  </div>
+
+  <div class="board-scroll">
+    <div class="board-canvas" id="boardCanvas">
+      <% if (todos.length === 0) { %>
+        <p class="empty-state" style="position:absolute; top:30px; left:30px;">Nothing open right now — new todos will show up here as sticky notes.</p>
+      <% } %>
+      <% todos.forEach(function(t) { %>
+        <% const urgency = todoUrgency(t.due_date); %>
+        <% const rot = ((t.id * 37) % 7) - 3; %>
+        <div class="postit" data-todo-id="<%= t.id %>" style="left:<%= t.board_x %>px; top:<%= t.board_y %>px; transform: rotate(<%= rot %>deg); background: <%= t.project_color %>2b;">
+          <div class="postit-top">
+            <a class="postit-project postit-no-drag" href="/projects/<%= t.project_id %>" style="background:<%= t.project_color %>;" title="Open <%= t.project_name %>"><%= t.project_name %></a>
+            <form method="POST" action="/projects/<%= t.project_id %>/todos/<%= t.id %>/toggle" class="postit-toggle-form postit-no-drag">
+              <button type="submit" class="postit-check" title="Mark done">&#10003;</button>
+            </form>
+          </div>
+          <div class="postit-text"><%= t.text %></div>
+          <% if (t.due_date) { %>
+            <div class="postit-due <%= urgency === 'overdue' ? 'todo-overdue' : (urgency === 'soon' ? 'todo-soon' : '') %>"><%= t.due_date %></div>
+          <% } %>
+        </div>
+      <% }); %>
+    </div>
+  </div>
+
+  <script src="/js/board.js"></script>
+</body>
+</html>

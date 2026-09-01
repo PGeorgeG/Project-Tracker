@@ -706,3 +706,75 @@ textarea { min-height: 70px; resize: vertical; }
 
 .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
 @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+
+/* ---- board ---- */
+.board-scroll {
+  overflow: auto;
+  height: calc(100vh - 110px);
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+}
+.board-canvas {
+  position: relative;
+  width: 2600px;
+  height: 1700px;
+}
+.postit {
+  position: absolute;
+  width: 170px;
+  min-height: 150px;
+  padding: 10px 12px 12px;
+  border-radius: 3px;
+  box-shadow: 2px 3px 8px rgba(0,0,0,0.15);
+  cursor: grab;
+  touch-action: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.postit.dragging {
+  cursor: grabbing;
+  box-shadow: 4px 6px 16px rgba(0,0,0,0.25);
+}
+.postit-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 6px;
+}
+.postit-project {
+  font-size: 10px;
+  font-weight: 600;
+  color: #fff;
+  padding: 2px 7px;
+  border-radius: 999px;
+  max-width: 110px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.6;
+}
+.postit-check {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid var(--border-strong);
+  background: rgba(255,255,255,0.6);
+  color: var(--text-secondary);
+  font-size: 11px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+}
+.postit-check:hover { background: var(--green-bg); border-color: var(--green); color: var(--green); }
+.postit-text {
+  font-size: 13.5px;
+  line-height: 1.4;
+  flex: 1;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.postit-due { font-size: 11px; color: var(--text-secondary); font-weight: 500; }
+.postit-due.todo-overdue { color: var(--red); }
+.postit-due.todo-soon { color: var(--amber); }

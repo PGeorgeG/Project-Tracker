@@ -36,6 +36,10 @@ if (!todoCols.includes('completed_at')) {
 if (!todoCols.includes('today_list_date')) {
   db.exec('ALTER TABLE todos ADD COLUMN today_list_date TEXT DEFAULT NULL');
 }
+if (!todoCols.includes('board_x')) {
+  db.exec('ALTER TABLE todos ADD COLUMN board_x INTEGER DEFAULT NULL');
+  db.exec('ALTER TABLE todos ADD COLUMN board_y INTEGER DEFAULT NULL');
+}
 
 const alertCols = db.prepare("PRAGMA table_info(alerts)").all().map(c => c.name);
 if (!alertCols.includes('today_list_date')) {
