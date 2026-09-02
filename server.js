@@ -207,6 +207,20 @@ app.get('/projects/new', (req, res) => {
   res.render('new-project', { STATUS_TAGS, CADENCES });
 });
 
+// Every new project starts with a baseline Aug 1 - Jul 31 fiscal-year
+// timeline (the org's standard cycle), anchored to whichever fiscal year
+// the project's start date falls in. Fully editable afterward -- the lead
+// can rename, reschedule, delete, or add to these like any other stage.
+function defaultFiscalYearStages(startDateStr) {
+  const start = new Date(startDateStr + 'T00:00:00');
+  const fyStartYear = start.getMonth() >= 7 ? start.getFullYear() : start.getFullYear() - 1;
+  return [
+    { label: 'FY Bgns', target_date: `${fyStartYear}-08-01` },
+    { label: 'Mid Year', target_date: `${fyStartYear + 1}-02-01` },
+    { label: 'FYE', target_date: `${fyStartYear + 1}-07-31` }
+  ];
+}
+
 app.post('/projects', (req, res) => {
   const { name, outcome, lead_name, start_date, end_date, status_tag, cadence, color, icon } = req.body;
   if (!name || !outcome || !lead_name || !start_date || !end_date) {
@@ -217,6 +231,12 @@ app.post('/projects', (req, res) => {
   const stmt = db.prepare(`INSERT INTO projects (name, outcome, lead_name, start_date, end_date, status_tag, cadence, color, icon, sort_order)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
   const info = stmt.run(name, outcome, lead_name, start_date, end_date, status_tag || '', cadence || '', color || '#378ADD', (icon || '').trim() || null, nextOrder);
+
+  const insertStage = db.prepare('INSERT INTO stages (project_id, label, target_date, status, sort_order) VALUES (?, ?, ?, ?, ?)');
+  defaultFiscalYearStages(start_date).forEach((s, i) => {
+    insertStage.run(info.lastInsertRowid, s.label, s.target_date, 'pending', i);
+  });
+
   res.redirect('/projects/' + info.lastInsertRowid);
 });
 
