@@ -28,6 +28,38 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
+  // Touch has no right-click, so a long press on a row opens the same menu.
+  // .postit wires up its own long-press (it needs to also cancel a
+  // possible drag) and dispatches this same contextmenu event when it fires.
+  const LONG_PRESS_MS = 550;
+  const LONG_PRESS_MOVE_TOLERANCE = 10;
+  document.querySelectorAll('.global-todo-row').forEach(function (row) {
+    let pressTimer = null;
+    let startX, startY;
+
+    function cancelPress() {
+      if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
+    }
+
+    row.addEventListener('pointerdown', function (e) {
+      if (e.pointerType !== 'touch') return;
+      startX = e.clientX;
+      startY = e.clientY;
+      pressTimer = setTimeout(function () {
+        pressTimer = null;
+        row.dispatchEvent(new MouseEvent('contextmenu', {
+          bubbles: true, cancelable: true, clientX: startX, clientY: startY
+        }));
+      }, LONG_PRESS_MS);
+    });
+    row.addEventListener('pointermove', function (e) {
+      if (!pressTimer) return;
+      if (Math.abs(e.clientX - startX) > LONG_PRESS_MOVE_TOLERANCE || Math.abs(e.clientY - startY) > LONG_PRESS_MOVE_TOLERANCE) cancelPress();
+    });
+    row.addEventListener('pointerup', cancelPress);
+    row.addEventListener('pointercancel', cancelPress);
+  });
+
   document.querySelectorAll('.row-kebab').forEach(function (btn) {
     btn.addEventListener('click', function (e) {
       e.stopPropagation();

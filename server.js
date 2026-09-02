@@ -298,7 +298,7 @@ app.post('/projects/:id/notes', (req, res) => {
   const posted = posted_on_timeline ? 1 : 0;
   db.prepare('INSERT INTO notes (project_id, meeting_date, text, posted_on_timeline, tone) VALUES (?, ?, ?, ?, ?)')
     .run(req.params.id, meeting_date, text, posted, posted ? (tone || 'green') : null);
-  res.redirect('/projects/' + req.params.id);
+  res.redirect((req.body && req.body.redirect_to) || ('/projects/' + req.params.id));
 });
 
 app.post('/projects/:id/notes/:noteId/edit', (req, res) => {
@@ -319,7 +319,7 @@ app.post('/projects/:id/todos', (req, res) => {
   const { text, due_date } = req.body;
   db.prepare('INSERT INTO todos (project_id, text, due_date) VALUES (?, ?, ?)')
     .run(req.params.id, text, due_date || null);
-  res.redirect('/projects/' + req.params.id);
+  res.redirect((req.body && req.body.redirect_to) || ('/projects/' + req.params.id));
 });
 
 app.post('/projects/:id/todos/:todoId/edit', (req, res) => {

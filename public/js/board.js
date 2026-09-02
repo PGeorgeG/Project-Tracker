@@ -3,12 +3,18 @@ document.addEventListener('DOMContentLoaded', function () {
   if (!canvas) return;
 
   const DRAG_THRESHOLD = 4;
+  const LONG_PRESS_MS = 550;
   let zTop = 10;
 
   canvas.querySelectorAll('.postit').forEach(function (note) {
     let dragging = false;
     let moved = false;
     let startX, startY, origLeft, origTop;
+    let longPressTimer = null;
+
+    function clearLongPress() {
+      if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+    }
 
     note.addEventListener('pointerdown', function (e) {
       if (e.button !== 0) return; // right-click opens the context menu instead
@@ -22,13 +28,30 @@ document.addEventListener('DOMContentLoaded', function () {
       note.setPointerCapture(e.pointerId);
       note.style.zIndex = ++zTop;
       note.classList.add('dragging');
+
+      // Touch has no right-click, so a long press without much movement
+      // opens the same "add to Today List" menu instead of starting a drag.
+      if (e.pointerType === 'touch') {
+        longPressTimer = setTimeout(function () {
+          longPressTimer = null;
+          if (moved) return;
+          dragging = false;
+          note.classList.remove('dragging');
+          note.dispatchEvent(new MouseEvent('contextmenu', {
+            bubbles: true, cancelable: true, clientX: startX, clientY: startY
+          }));
+        }, LONG_PRESS_MS);
+      }
     });
 
     note.addEventListener('pointermove', function (e) {
       if (!dragging) return;
       const dx = e.clientX - startX;
       const dy = e.clientY - startY;
-      if (!moved && (Math.abs(dx) > DRAG_THRESHOLD || Math.abs(dy) > DRAG_THRESHOLD)) moved = true;
+      if (!moved && (Math.abs(dx) > DRAG_THRESHOLD || Math.abs(dy) > DRAG_THRESHOLD)) {
+        moved = true;
+        clearLongPress();
+      }
       if (!moved) return;
       const maxLeft = canvas.clientWidth - note.offsetWidth;
       const maxTop = canvas.clientHeight - note.offsetHeight;
@@ -37,6 +60,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     note.addEventListener('pointerup', function () {
+      clearLongPress();
       if (!dragging) return;
       dragging = false;
       note.classList.remove('dragging');
