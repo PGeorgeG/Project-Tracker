@@ -1,6 +1,8 @@
 const express = require('express');
 const session = require('express-session');
 const path = require('path');
+const fs = require('fs');
+const os = require('os');
 const db = require('./db');
 
 const app = express();
@@ -551,6 +553,58 @@ app.get('/completed-todos', (req, res) => {
   `).all();
 
   res.render('completed-todos', { completedTodos });
+});
+
+// ---------- Backup & export ----------
+// Uses SQLite's online backup API for a consistent, corruption-safe copy
+// even if the app is mid-write, rather than reading the live file directly.
+app.get('/backup', async (req, res) => {
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const filename = `project-tracker-backup-${todayStr}.db`;
+  const tempPath = path.join(os.tmpdir(), `pt-backup-${Date.now()}-${Math.random().toString(36).slice(2)}.db`);
+  try {
+    await db.backup(tempPath);
+    res.download(tempPath, filename, (err) => {
+      fs.unlink(tempPath, () => {});
+      if (err && !res.headersSent) res.status(500).send('Backup download failed');
+    });
+  } catch (err) {
+    fs.unlink(tempPath, () => {});
+    res.status(500).send('Backup failed: ' + err.message);
+  }
+});
+
+const CSV_TABLES = ['projects', 'stages', 'notes', 'todos', 'alerts', 'links'];
+
+function toCsv(rows) {
+  if (rows.length === 0) return '';
+  const columns = Object.keys(rows[0]);
+  const escapeField = (value) => {
+    if (value === null || value === undefined) return '';
+    const str = String(value);
+    if (/[",\n\r]/.test(str)) return '"' + str.replace(/"/g, '""') + '"';
+    return str;
+  };
+  const lines = [columns.join(',')];
+  rows.forEach(row => {
+    lines.push(columns.map(c => escapeField(row[c])).join(','));
+  });
+  return lines.join('\r\n');
+}
+
+app.get('/export', (req, res) => {
+  res.render('export', { tables: CSV_TABLES });
+});
+
+app.get('/export/csv/:table', (req, res) => {
+  const table = req.params.table;
+  if (!CSV_TABLES.includes(table)) return res.status(404).send('Unknown table');
+  const rows = db.prepare(`SELECT * FROM ${table} ORDER BY id ASC`).all();
+  const csv = toCsv(rows);
+  const todayStr = new Date().toISOString().slice(0, 10);
+  res.set('Content-Type', 'text/csv');
+  res.set('Content-Disposition', `attachment; filename="${table}-${todayStr}.csv"`);
+  res.send(csv);
 });
 
 // ---------- Board ----------

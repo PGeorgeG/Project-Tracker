@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Export as CSV — Project Tracker</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div>
+        <a href="/" style="font-size:13px;">&larr; All projects</a>
+        <h1 style="margin-top:4px;">Export as CSV</h1>
+      </div>
+    </div>
+
+    <div class="card">
+      <p class="muted" style="font-size:13px; margin-top:0;">
+        Each button downloads one table as a CSV file, for opening in a spreadsheet.
+        This is for reviewing your data, not for backup — CSV doesn't preserve the
+        relationships between projects and their stages, notes, todos, alerts, and
+        links. For a real backup, use <a href="/backup">Backup Data</a> instead.
+      </p>
+      <div style="display:flex; flex-wrap:wrap; gap:10px;">
+        <% tables.forEach(function(t) { %>
+          <a class="btn" href="/export/csv/<%= t %>"><%= t.charAt(0).toUpperCase() + t.slice(1) %>.csv</a>
+        <% }); %>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
