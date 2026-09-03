@@ -73,6 +73,52 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
+  // Holding box: drag a waiting note out onto the canvas to give it a
+  // position for the first time. Dropping outside the canvas leaves it
+  // in the holding box untouched.
+  document.querySelectorAll('.holding-note').forEach(function (note) {
+    note.addEventListener('pointerdown', function (e) {
+      if (e.button !== 0) return;
+      e.preventDefault();
+
+      const ghost = note.cloneNode(true);
+      ghost.classList.add('holding-note-ghost');
+      ghost.style.position = 'fixed';
+      ghost.style.left = (e.clientX - 20) + 'px';
+      ghost.style.top = (e.clientY - 20) + 'px';
+      ghost.style.pointerEvents = 'none';
+      ghost.style.zIndex = 9999;
+      document.body.appendChild(ghost);
+
+      function onMove(ev) {
+        ghost.style.left = (ev.clientX - 20) + 'px';
+        ghost.style.top = (ev.clientY - 20) + 'px';
+      }
+
+      function onUp(ev) {
+        document.removeEventListener('pointermove', onMove);
+        document.removeEventListener('pointerup', onUp);
+        ghost.remove();
+
+        const dropEl = document.elementFromPoint(ev.clientX, ev.clientY);
+        const dropCanvas = dropEl && dropEl.closest('#boardCanvas');
+        if (!dropCanvas) return; // dropped outside the board — stays in the holding box
+
+        const rect = dropCanvas.getBoundingClientRect();
+        const x = Math.max(0, Math.round(ev.clientX - rect.left - 20));
+        const y = Math.max(0, Math.round(ev.clientY - rect.top - 20));
+        fetch('/todos/' + note.dataset.todoId + '/position', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: 'x=' + x + '&y=' + y
+        }).then(function () { window.location.reload(); });
+      }
+
+      document.addEventListener('pointermove', onMove);
+      document.addEventListener('pointerup', onUp);
+    });
+  });
+
   canvas.querySelectorAll('.postit-toggle-form').forEach(function (form) {
     form.addEventListener('submit', function (e) {
       e.preventDefault();

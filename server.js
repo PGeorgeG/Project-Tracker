@@ -631,7 +631,7 @@ app.get('/export/csv/:table', (req, res) => {
 // New todos with no saved position yet fan out from the top-left corner,
 // like a fresh stack of sticky notes waiting to be spread out by hand.
 app.get('/board', (req, res) => {
-  const todos = db.prepare(`
+  const allTodos = db.prepare(`
     SELECT todos.*, projects.name AS project_name, projects.color AS project_color
     FROM todos
     JOIN projects ON projects.id = todos.project_id
@@ -639,18 +639,15 @@ app.get('/board', (req, res) => {
     ORDER BY todos.created_at ASC
   `).all();
 
-  let unpositioned = 0;
-  todos.forEach(t => {
-    if (t.board_x === null || t.board_y === null) {
-      const n = unpositioned++;
-      t.board_x = 30 + (n % 12) * 26;
-      t.board_y = 30 + (n % 12) * 22;
-    }
-  });
+  // New todos start with no board position and wait in the holding box
+  // (rendered above the canvas) until dragged onto the board, rather than
+  // being auto-placed where they'd overlap existing notes.
+  const todos = allTodos.filter(t => t.board_x !== null && t.board_y !== null);
+  const holdingTodos = allTodos.filter(t => t.board_x === null || t.board_y === null);
 
   const { todayStr, todayListTodos, todayListAlerts } = getTodayList();
 
-  res.render('board', { todos, todayStr, todayListTodos, todayListAlerts });
+  res.render('board', { todos, holdingTodos, todayStr, todayListTodos, todayListAlerts });
 });
 
 app.post('/todos/:id/position', (req, res) => {
