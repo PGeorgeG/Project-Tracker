@@ -5,10 +5,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sticky Notes Board — Project Tracker</title>
   <link rel="stylesheet" href="/css/style.css">
+  <meta name="csrf-token" content="<%= csrfToken %>">
 </head>
 <body>
   <div class="wrap wrap-wide" style="padding-bottom:0.5rem;">
-    <div class="topbar">
+    <div class="topbar" style="align-items:flex-start;">
+      <div class="holding-box" id="holdingBox">
+        <p class="holding-box-title">New notes <span class="muted" style="font-weight:400;">— drag onto the board</span></p>
+        <% if (holdingTodos.length === 0) { %>
+          <p class="empty-state" style="padding:2px 0; margin:0;">Nothing waiting.</p>
+        <% } else { %>
+          <div class="holding-box-notes">
+            <% holdingTodos.forEach(function(t) { %>
+              <div class="holding-note" data-todo-id="<%= t.id %>" style="background: <%= t.project_color %>2b; border-color: <%= t.project_color %>;">
+                <span class="postit-project" style="background:<%= t.project_color %>;"><%= t.project_name %></span>
+                <span class="holding-note-text"><%= t.text %></span>
+              </div>
+            <% }); %>
+          </div>
+        <% } %>
+      </div>
       <div>
         <a href="/" style="font-size:13px;">&larr; All projects</a>
         <h1 style="margin-top:4px;">Sticky Notes Board</h1>
@@ -59,7 +75,7 @@
     <div class="board-scroll">
       <div class="board-canvas" id="boardCanvas">
         <% if (todos.length === 0) { %>
-          <p class="empty-state" style="position:absolute; top:30px; left:30px;">Nothing open right now — new todos will show up here as sticky notes.</p>
+          <p class="empty-state" style="position:absolute; top:30px; left:30px;">No notes placed on the board yet — drag them in from the tray above.</p>
         <% } %>
         <% todos.forEach(function(t) { %>
           <% const urgency = todoUrgency(t.due_date); %>
@@ -87,6 +103,7 @@
     <button type="button" id="ctxRemoveToday">Remove from Today List</button>
   </div>
 
+  <script src="/js/csrf.js"></script>
   <script src="/js/board.js"></script>
   <script src="/js/today-list.js"></script>
 </body>

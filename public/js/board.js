@@ -2,6 +2,9 @@ document.addEventListener('DOMContentLoaded', function () {
   const canvas = document.getElementById('boardCanvas');
   if (!canvas) return;
 
+  const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+  const csrfToken = csrfMeta ? csrfMeta.content : '';
+
   const DRAG_THRESHOLD = 4;
   const LONG_PRESS_MS = 550;
   let zTop = 10;
@@ -68,8 +71,54 @@ document.addEventListener('DOMContentLoaded', function () {
       fetch('/todos/' + note.dataset.todoId + '/position', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: 'x=' + note.offsetLeft + '&y=' + note.offsetTop
+        body: 'x=' + note.offsetLeft + '&y=' + note.offsetTop + '&_csrf=' + encodeURIComponent(csrfToken)
       });
+    });
+  });
+
+  // Holding box: drag a waiting note out onto the canvas to give it a
+  // position for the first time. Dropping outside the canvas leaves it
+  // in the holding box untouched.
+  document.querySelectorAll('.holding-note').forEach(function (note) {
+    note.addEventListener('pointerdown', function (e) {
+      if (e.button !== 0) return;
+      e.preventDefault();
+
+      const ghost = note.cloneNode(true);
+      ghost.classList.add('holding-note-ghost');
+      ghost.style.position = 'fixed';
+      ghost.style.left = (e.clientX - 20) + 'px';
+      ghost.style.top = (e.clientY - 20) + 'px';
+      ghost.style.pointerEvents = 'none';
+      ghost.style.zIndex = 9999;
+      document.body.appendChild(ghost);
+
+      function onMove(ev) {
+        ghost.style.left = (ev.clientX - 20) + 'px';
+        ghost.style.top = (ev.clientY - 20) + 'px';
+      }
+
+      function onUp(ev) {
+        document.removeEventListener('pointermove', onMove);
+        document.removeEventListener('pointerup', onUp);
+        ghost.remove();
+
+        const dropEl = document.elementFromPoint(ev.clientX, ev.clientY);
+        const dropCanvas = dropEl && dropEl.closest('#boardCanvas');
+        if (!dropCanvas) return; // dropped outside the board — stays in the holding box
+
+        const rect = dropCanvas.getBoundingClientRect();
+        const x = Math.max(0, Math.round(ev.clientX - rect.left - 20));
+        const y = Math.max(0, Math.round(ev.clientY - rect.top - 20));
+        fetch('/todos/' + note.dataset.todoId + '/position', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: 'x=' + x + '&y=' + y + '&_csrf=' + encodeURIComponent(csrfToken)
+        }).then(function () { window.location.reload(); });
+      }
+
+      document.addEventListener('pointermove', onMove);
+      document.addEventListener('pointerup', onUp);
     });
   });
 
@@ -77,7 +126,11 @@ document.addEventListener('DOMContentLoaded', function () {
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       const note = form.closest('.postit');
-      fetch(form.action, { method: 'POST' }).then(function () {
+      fetch(form.action, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: '_csrf=' + encodeURIComponent(csrfToken)
+      }).then(function () {
         note.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
         note.style.opacity = '0';
         note.style.transform += ' scale(0.85)';

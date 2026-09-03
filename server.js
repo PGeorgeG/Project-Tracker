@@ -3,6 +3,7 @@ const session = require('express-session');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
+const crypto = require('crypto');
 const db = require('./db');
 
 const app = express();
@@ -33,19 +34,72 @@ app.use(function (req, res, next) {
   res.redirect('/login');
 });
 
+// Every authenticated session gets a CSRF token, exposed to views as
+// `csrfToken` so forms can carry it in a hidden field (see public/js/csrf.js,
+// which injects it automatically) and fetch() calls can include it
+// explicitly. Scoped to authenticated sessions so an anonymous visit to
+// /login doesn't spin up a session of its own.
+app.use(function (req, res, next) {
+  if (req.session && req.session.authenticated) {
+    if (!req.session.csrfToken) {
+      req.session.csrfToken = crypto.randomBytes(24).toString('hex');
+    }
+    res.locals.csrfToken = req.session.csrfToken;
+  }
+  next();
+});
+
+// Login attempts are shared across everyone using the same password, so a
+// per-IP lockout (rather than per-session) is what actually stops guessing:
+// 5 wrong passwords from one IP locks it out for 15 minutes. State lives in
+// memory only — it resets on a redeploy/restart, which is fine at this scale.
+const LOGIN_MAX_ATTEMPTS = 5;
+const LOGIN_WINDOW_MS = 15 * 60 * 1000; // a stale attempt streak stops counting after this long
+const LOGIN_LOCKOUT_MS = 15 * 60 * 1000;
+const loginAttempts = new Map(); // ip -> { count, lastAttempt, lockedUntil }
+
+function getLoginState(ip) {
+  const state = loginAttempts.get(ip);
+  if (!state) return { count: 0, lastAttempt: 0, lockedUntil: 0 };
+  const now = Date.now();
+  const stale = state.lockedUntil ? state.lockedUntil <= now : (now - state.lastAttempt > LOGIN_WINDOW_MS);
+  if (stale) {
+    loginAttempts.delete(ip);
+    return { count: 0, lastAttempt: 0, lockedUntil: 0 };
+  }
+  return state;
+}
+
 app.get('/login', (req, res) => {
   res.render('login', { error: null });
 });
 
 app.post('/login', (req, res) => {
+  const now = Date.now();
+  const state = getLoginState(req.ip);
+
+  if (state.lockedUntil > now) {
+    const minutesLeft = Math.ceil((state.lockedUntil - now) / 60000);
+    return res.render('login', { error: `Too many failed attempts. Try again in ${minutesLeft} minute${minutesLeft === 1 ? '' : 's'}.` });
+  }
+
   const appPassword = process.env.APP_PASSWORD;
   if (!appPassword) {
     return res.render('login', { error: 'APP_PASSWORD is not set on the server. Add it in Railway environment variables.' });
   }
+
   if (req.body.password === appPassword) {
+    loginAttempts.delete(req.ip);
     req.session.authenticated = true;
     return res.redirect('/');
   }
+
+  const count = state.count + 1;
+  if (count >= LOGIN_MAX_ATTEMPTS) {
+    loginAttempts.set(req.ip, { count: 0, lastAttempt: now, lockedUntil: now + LOGIN_LOCKOUT_MS });
+    return res.render('login', { error: `Too many failed attempts. Try again in ${Math.ceil(LOGIN_LOCKOUT_MS / 60000)} minutes.` });
+  }
+  loginAttempts.set(req.ip, { count, lastAttempt: now, lockedUntil: 0 });
   res.render('login', { error: 'Incorrect password.' });
 });
 
@@ -53,6 +107,18 @@ app.post('/logout', (req, res) => {
   req.session.destroy(function () {
     res.redirect('/login');
   });
+});
+
+// CSRF check for every other POST: the form (or fetch call) must echo back
+// this session's token, so a request forged from another site — which has
+// no way to read it — gets rejected even though the browser still sends
+// the session cookie automatically.
+app.use(function (req, res, next) {
+  if (req.method !== 'POST') return next();
+  if (req.body && req.body._csrf && req.body._csrf === req.session.csrfToken) {
+    return next();
+  }
+  res.status(403).send('This form session has expired. Go back, reload the page, and try again.');
 });
 
 function escapeHtml(str) {
@@ -628,10 +694,10 @@ app.get('/export/csv/:table', (req, res) => {
 });
 
 // ---------- Board ----------
-// New todos with no saved position yet fan out from the top-left corner,
-// like a fresh stack of sticky notes waiting to be spread out by hand.
+// New todos with no saved position yet wait in the holding box above the
+// canvas until dragged out, rather than being auto-placed on the board.
 app.get('/board', (req, res) => {
-  const todos = db.prepare(`
+  const allTodos = db.prepare(`
     SELECT todos.*, projects.name AS project_name, projects.color AS project_color
     FROM todos
     JOIN projects ON projects.id = todos.project_id
@@ -639,18 +705,15 @@ app.get('/board', (req, res) => {
     ORDER BY todos.created_at ASC
   `).all();
 
-  let unpositioned = 0;
-  todos.forEach(t => {
-    if (t.board_x === null || t.board_y === null) {
-      const n = unpositioned++;
-      t.board_x = 30 + (n % 12) * 26;
-      t.board_y = 30 + (n % 12) * 22;
-    }
-  });
+  // New todos start with no board position and wait in the holding box
+  // (rendered above the canvas) until dragged onto the board, rather than
+  // being auto-placed where they'd overlap existing notes.
+  const todos = allTodos.filter(t => t.board_x !== null && t.board_y !== null);
+  const holdingTodos = allTodos.filter(t => t.board_x === null || t.board_y === null);
 
   const { todayStr, todayListTodos, todayListAlerts } = getTodayList();
 
-  res.render('board', { todos, todayStr, todayListTodos, todayListAlerts });
+  res.render('board', { todos, holdingTodos, todayStr, todayListTodos, todayListAlerts });
 });
 
 app.post('/todos/:id/position', (req, res) => {
