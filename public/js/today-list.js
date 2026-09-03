@@ -74,16 +74,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const projectId = activeRow.dataset.projectId;
     const todoId = activeRow.dataset.todoId;
     const kind = activeRow.dataset.type === 'alert' ? 'alerts' : 'todos';
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = '/projects/' + projectId + '/' + kind + '/' + todoId + path;
-    const redirectInput = document.createElement('input');
-    redirectInput.type = 'hidden';
-    redirectInput.name = 'redirect_to';
-    redirectInput.value = window.location.pathname;
-    form.appendChild(redirectInput);
-    document.body.appendChild(form);
-    form.submit();
+    const url = '/projects/' + projectId + '/' + kind + '/' + todoId + path;
+    fetch(url, { method: 'POST' }).then(function () {
+      window.location.reload();
+    });
   }
 
   addBtn.addEventListener('click', function () { submitAction('/today'); });
