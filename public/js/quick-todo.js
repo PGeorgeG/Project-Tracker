@@ -7,10 +7,13 @@ document.addEventListener('DOMContentLoaded', function () {
   const nameLabel = document.querySelector('.quick-todo-project-name');
   const cancelBtn = document.getElementById('quickTodoCancel');
 
+  if (window.PTDraft) window.PTDraft.wire(input);
+
   function openModal(projectId, projectName) {
     form.action = '/projects/' + projectId + '/todos';
     nameLabel.textContent = projectName;
-    input.value = '';
+    input.dataset.draftKey = 'quick-todo-' + projectId;
+    input.value = (window.PTDraft && window.PTDraft.get('pt-draft:' + input.dataset.draftKey)) || '';
     overlay.style.display = 'flex';
     // Focus after the browser has painted the modal, otherwise mobile
     // keyboards sometimes fail to open on the same tap that revealed it.

@@ -178,7 +178,7 @@
             </div>
             <div class="form-group">
               <label>What happened <span class="muted" style="font-weight:400;">— start a line with - for a bullet point</span></label>
-              <textarea name="text" required placeholder="Notes from this meeting&#10;Start a line with - for a bullet point"></textarea>
+              <textarea name="text" required placeholder="Notes from this meeting&#10;Start a line with - for a bullet point" data-draft-key="note-new-<%= project.id %>"></textarea>
             </div>
             <div class="checkbox-row">
               <input type="checkbox" id="postToggle" name="posted_on_timeline" value="1">
@@ -299,7 +299,7 @@
         <form method="POST" action="/projects/<%= project.id %>/todos" style="margin-top:1rem;">
           <div class="form-group">
             <label>New todo</label>
-            <input type="text" name="text" required placeholder="What needs doing">
+            <input type="text" name="text" required placeholder="What needs doing" data-draft-key="todo-new-<%= project.id %>">
           </div>
           <div class="form-group">
             <label>Due date (optional)</label>
@@ -384,6 +384,7 @@
   </div>
 
   <script src="/js/csrf.js"></script>
+  <script src="/js/draft-compose.js"></script>
   <script src="/js/timeline.js"></script>
 </body>
 </html>

@@ -8,10 +8,13 @@ document.addEventListener('DOMContentLoaded', function () {
   const nameLabel = overlay.querySelector('.quick-todo-project-name');
   const cancelBtn = document.getElementById('quickNoteCancel');
 
+  if (window.PTDraft) window.PTDraft.wire(input);
+
   function openModal(projectId, projectName) {
     form.action = '/projects/' + projectId + '/notes';
     nameLabel.textContent = projectName;
-    input.value = '';
+    input.dataset.draftKey = 'quick-note-' + projectId;
+    input.value = (window.PTDraft && window.PTDraft.get('pt-draft:' + input.dataset.draftKey)) || '';
     // Stamp with the date at the moment the modal is opened, rather than
     // when the dashboard page was originally loaded.
     const now = new Date();
