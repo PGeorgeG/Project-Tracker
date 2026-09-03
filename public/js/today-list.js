@@ -6,6 +6,9 @@ document.addEventListener('DOMContentLoaded', function () {
   const removeBtn = document.getElementById('ctxRemoveToday');
   let activeRow = null;
 
+  const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+  const csrfToken = csrfMeta ? csrfMeta.content : '';
+
   function showMenu(x, y, row) {
     activeRow = row;
     const onToday = row.dataset.onToday === 'true';
@@ -75,7 +78,11 @@ document.addEventListener('DOMContentLoaded', function () {
     const todoId = activeRow.dataset.todoId;
     const kind = activeRow.dataset.type === 'alert' ? 'alerts' : 'todos';
     const url = '/projects/' + projectId + '/' + kind + '/' + todoId + path;
-    fetch(url, { method: 'POST' }).then(function () {
+    fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: '_csrf=' + encodeURIComponent(csrfToken)
+    }).then(function () {
       window.location.reload();
     });
   }
