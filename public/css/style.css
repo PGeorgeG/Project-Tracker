@@ -664,7 +664,6 @@ a:hover { text-decoration: underline; }
 .rich-text ul { margin: 0 0 8px; padding-left: 18px; }
 .rich-text ul:last-child { margin-bottom: 0; }
 .rich-text li { margin-bottom: 2px; }
-.note-edit-form { max-width: 420px; }
 
 /* ---- forms ---- */
 .form-group { margin-bottom: 1rem; }
@@ -685,13 +684,19 @@ textarea { min-height: 70px; resize: vertical; }
 .section-title { font-size: 13px; color: var(--text-muted); margin: 0 0 10px; text-transform: uppercase; letter-spacing: 0.03em; }
 
 .stage-row, .todo-row, .alert-row, .link-row {
-  display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px;
+  display: flex; align-items: center; flex-wrap: wrap; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px;
 }
 .link-row a { color: var(--accent); }
 .stage-row-wrap:last-child .stage-row { border-bottom: 1px solid var(--border); }
 .stage-edit-toggle { position: relative; }
 .stage-edit-toggle summary { list-style: none; cursor: pointer; }
 .stage-edit-toggle summary::-webkit-details-marker { display: none; }
+/* Expand the edit box to the full row width instead of squeezing into
+   whatever space is left next to the other row content. */
+.stage-edit-toggle[open] { flex-basis: 100%; }
+.log-row-head:has(.stage-edit-toggle[open]) { flex-wrap: wrap; }
+.log-actions:has(.stage-edit-toggle[open]) { flex-basis: 100%; }
+.stage-edit-form textarea { min-height: 140px; }
 .stage-edit-form {
   margin: 8px 0 12px; padding: 12px; background: var(--bg);
   border: 1px solid var(--border); border-radius: var(--radius);
