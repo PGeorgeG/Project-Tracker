@@ -49,19 +49,57 @@ app.use(function (req, res, next) {
   next();
 });
 
+// Login attempts are shared across everyone using the same password, so a
+// per-IP lockout (rather than per-session) is what actually stops guessing:
+// 5 wrong passwords from one IP locks it out for 15 minutes. State lives in
+// memory only — it resets on a redeploy/restart, which is fine at this scale.
+const LOGIN_MAX_ATTEMPTS = 5;
+const LOGIN_WINDOW_MS = 15 * 60 * 1000; // a stale attempt streak stops counting after this long
+const LOGIN_LOCKOUT_MS = 15 * 60 * 1000;
+const loginAttempts = new Map(); // ip -> { count, lastAttempt, lockedUntil }
+
+function getLoginState(ip) {
+  const state = loginAttempts.get(ip);
+  if (!state) return { count: 0, lastAttempt: 0, lockedUntil: 0 };
+  const now = Date.now();
+  const stale = state.lockedUntil ? state.lockedUntil <= now : (now - state.lastAttempt > LOGIN_WINDOW_MS);
+  if (stale) {
+    loginAttempts.delete(ip);
+    return { count: 0, lastAttempt: 0, lockedUntil: 0 };
+  }
+  return state;
+}
+
 app.get('/login', (req, res) => {
   res.render('login', { error: null });
 });
 
 app.post('/login', (req, res) => {
+  const now = Date.now();
+  const state = getLoginState(req.ip);
+
+  if (state.lockedUntil > now) {
+    const minutesLeft = Math.ceil((state.lockedUntil - now) / 60000);
+    return res.render('login', { error: `Too many failed attempts. Try again in ${minutesLeft} minute${minutesLeft === 1 ? '' : 's'}.` });
+  }
+
   const appPassword = process.env.APP_PASSWORD;
   if (!appPassword) {
     return res.render('login', { error: 'APP_PASSWORD is not set on the server. Add it in Railway environment variables.' });
   }
+
   if (req.body.password === appPassword) {
+    loginAttempts.delete(req.ip);
     req.session.authenticated = true;
     return res.redirect('/');
   }
+
+  const count = state.count + 1;
+  if (count >= LOGIN_MAX_ATTEMPTS) {
+    loginAttempts.set(req.ip, { count: 0, lastAttempt: now, lockedUntil: now + LOGIN_LOCKOUT_MS });
+    return res.render('login', { error: `Too many failed attempts. Try again in ${Math.ceil(LOGIN_LOCKOUT_MS / 60000)} minutes.` });
+  }
+  loginAttempts.set(req.ip, { count, lastAttempt: now, lockedUntil: 0 });
   res.render('login', { error: 'Incorrect password.' });
 });
 
