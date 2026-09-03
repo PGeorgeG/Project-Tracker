@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><%= project.name %></title>
   <link rel="stylesheet" href="/css/style.css">
+  <meta name="csrf-token" content="<%= csrfToken %>">
 </head>
 <body>
   <div class="wrap">
@@ -382,6 +383,7 @@
     </div>
   </div>
 
+  <script src="/js/csrf.js"></script>
   <script src="/js/timeline.js"></script>
 </body>
 </html>

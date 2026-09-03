@@ -3,6 +3,7 @@ const session = require('express-session');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
+const crypto = require('crypto');
 const db = require('./db');
 
 const app = express();
@@ -33,6 +34,21 @@ app.use(function (req, res, next) {
   res.redirect('/login');
 });
 
+// Every authenticated session gets a CSRF token, exposed to views as
+// `csrfToken` so forms can carry it in a hidden field (see public/js/csrf.js,
+// which injects it automatically) and fetch() calls can include it
+// explicitly. Scoped to authenticated sessions so an anonymous visit to
+// /login doesn't spin up a session of its own.
+app.use(function (req, res, next) {
+  if (req.session && req.session.authenticated) {
+    if (!req.session.csrfToken) {
+      req.session.csrfToken = crypto.randomBytes(24).toString('hex');
+    }
+    res.locals.csrfToken = req.session.csrfToken;
+  }
+  next();
+});
+
 app.get('/login', (req, res) => {
   res.render('login', { error: null });
 });
@@ -53,6 +69,18 @@ app.post('/logout', (req, res) => {
   req.session.destroy(function () {
     res.redirect('/login');
   });
+});
+
+// CSRF check for every other POST: the form (or fetch call) must echo back
+// this session's token, so a request forged from another site — which has
+// no way to read it — gets rejected even though the browser still sends
+// the session cookie automatically.
+app.use(function (req, res, next) {
+  if (req.method !== 'POST') return next();
+  if (req.body && req.body._csrf && req.body._csrf === req.session.csrfToken) {
+    return next();
+  }
+  res.status(403).send('This form session has expired. Go back, reload the page, and try again.');
 });
 
 function escapeHtml(str) {
@@ -628,8 +656,8 @@ app.get('/export/csv/:table', (req, res) => {
 });
 
 // ---------- Board ----------
-// New todos with no saved position yet fan out from the top-left corner,
-// like a fresh stack of sticky notes waiting to be spread out by hand.
+// New todos with no saved position yet wait in the holding box above the
+// canvas until dragged out, rather than being auto-placed on the board.
 app.get('/board', (req, res) => {
   const allTodos = db.prepare(`
     SELECT todos.*, projects.name AS project_name, projects.color AS project_color

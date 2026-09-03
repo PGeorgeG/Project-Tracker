@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sticky Notes Board — Project Tracker</title>
   <link rel="stylesheet" href="/css/style.css">
+  <meta name="csrf-token" content="<%= csrfToken %>">
 </head>
 <body>
   <div class="wrap wrap-wide" style="padding-bottom:0.5rem;">
@@ -102,6 +103,7 @@
     <button type="button" id="ctxRemoveToday">Remove from Today List</button>
   </div>
 
+  <script src="/js/csrf.js"></script>
   <script src="/js/board.js"></script>
   <script src="/js/today-list.js"></script>
 </body>

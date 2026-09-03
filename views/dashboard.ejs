@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Project Tracker</title>
   <link rel="stylesheet" href="/css/style.css">
+  <meta name="csrf-token" content="<%= csrfToken %>">
 </head>
 <body>
   <div class="wrap wrap-wide">
@@ -269,6 +270,7 @@
     </div>
   </div>
 
+  <script src="/js/csrf.js"></script>
   <script src="/js/timeline.js"></script>
   <script src="/js/today-list.js"></script>
   <script src="/js/quick-todo.js"></script>

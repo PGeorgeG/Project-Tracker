@@ -2,6 +2,9 @@ document.addEventListener('DOMContentLoaded', function () {
   const canvas = document.getElementById('boardCanvas');
   if (!canvas) return;
 
+  const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+  const csrfToken = csrfMeta ? csrfMeta.content : '';
+
   const DRAG_THRESHOLD = 4;
   const LONG_PRESS_MS = 550;
   let zTop = 10;
@@ -68,7 +71,7 @@ document.addEventListener('DOMContentLoaded', function () {
       fetch('/todos/' + note.dataset.todoId + '/position', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: 'x=' + note.offsetLeft + '&y=' + note.offsetTop
+        body: 'x=' + note.offsetLeft + '&y=' + note.offsetTop + '&_csrf=' + encodeURIComponent(csrfToken)
       });
     });
   });
@@ -110,7 +113,7 @@ document.addEventListener('DOMContentLoaded', function () {
         fetch('/todos/' + note.dataset.todoId + '/position', {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: 'x=' + x + '&y=' + y
+          body: 'x=' + x + '&y=' + y + '&_csrf=' + encodeURIComponent(csrfToken)
         }).then(function () { window.location.reload(); });
       }
 
@@ -123,7 +126,11 @@ document.addEventListener('DOMContentLoaded', function () {
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       const note = form.closest('.postit');
-      fetch(form.action, { method: 'POST' }).then(function () {
+      fetch(form.action, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: '_csrf=' + encodeURIComponent(csrfToken)
+      }).then(function () {
         note.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
         note.style.opacity = '0';
         note.style.transform += ' scale(0.85)';
