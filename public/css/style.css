@@ -104,6 +104,24 @@ a:hover { text-decoration: underline; }
   height: 200px;
   overflow-y: auto;
 }
+.ai-report-box {
+  max-width: 720px;
+  max-height: 82vh;
+  display: flex;
+  flex-direction: column;
+}
+.ai-report-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.ai-report-question { font-weight: 600; font-size: 14px; margin: 0; }
+.ai-report-body { overflow-y: auto; flex: 1; }
 .quick-todo-actions {
   display: flex;
   justify-content: flex-end;

@@ -676,7 +676,7 @@ app.post('/report/ask', async (req, res) => {
       messages: [{ role: 'user', content: question }]
     });
     const answer = message.content.filter(b => b.type === 'text').map(b => b.text).join('\n');
-    res.json({ answerHtml: renderOutcome(answer) });
+    res.json({ answer, answerHtml: renderOutcome(answer) });
   } catch (err) {
     console.error('AI report question failed:', err);
     res.status(500).json({ error: 'The AI request failed. Check the server logs and API key.' });

@@ -4,10 +4,56 @@ document.addEventListener('DOMContentLoaded', function () {
 
   const input = document.getElementById('aiAskInput');
   const btn = document.getElementById('aiAskBtn');
-  const answerEl = document.getElementById('aiAskAnswer');
   const errorEl = document.getElementById('aiAskError');
   const csrfMeta = document.querySelector('meta[name="csrf-token"]');
   const csrfToken = csrfMeta ? csrfMeta.content : '';
+
+  const modal = document.getElementById('aiReportModal');
+  const questionEl = document.getElementById('aiReportQuestion');
+  const answerEl = document.getElementById('aiReportAnswer');
+  const closeBtn = document.getElementById('aiReportClose');
+  const copyBtn = document.getElementById('aiReportCopyBtn');
+  let lastAnswerText = '';
+
+  function openModal(question, answerHtml, answerText) {
+    questionEl.textContent = question;
+    answerEl.innerHTML = answerHtml;
+    lastAnswerText = answerText;
+    modal.style.display = 'flex';
+  }
+
+  function closeModal() {
+    modal.style.display = 'none';
+  }
+
+  closeBtn.addEventListener('click', closeModal);
+  modal.addEventListener('click', function (e) {
+    if (e.target === modal) closeModal();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && modal.style.display !== 'none') closeModal();
+  });
+
+  copyBtn.addEventListener('click', function () {
+    function fallbackCopy(text) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); } catch (e) { /* clipboard unavailable */ }
+      document.body.removeChild(ta);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(lastAnswerText).catch(function () { fallbackCopy(lastAnswerText); });
+    } else {
+      fallbackCopy(lastAnswerText);
+    }
+    const original = copyBtn.textContent;
+    copyBtn.textContent = 'Copied!';
+    setTimeout(function () { copyBtn.textContent = original; }, 1500);
+  });
 
   form.addEventListener('submit', function (e) {
     e.preventDefault();
@@ -15,7 +61,6 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!question) return;
 
     errorEl.style.display = 'none';
-    answerEl.style.display = 'none';
     const originalText = btn.textContent;
     btn.disabled = true;
     btn.textContent = 'Thinking…';
@@ -30,8 +75,7 @@ document.addEventListener('DOMContentLoaded', function () {
       })
       .then(function (result) {
         if (!result.ok) throw new Error(result.data.error || 'Something went wrong.');
-        answerEl.innerHTML = result.data.answerHtml;
-        answerEl.style.display = 'block';
+        openModal(question, result.data.answerHtml, result.data.answer);
       })
       .catch(function (err) {
         errorEl.textContent = err.message;

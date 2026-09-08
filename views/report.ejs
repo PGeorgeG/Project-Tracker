@@ -46,7 +46,6 @@
         </div>
       </form>
       <p id="aiAskError" class="muted" style="color:var(--red); display:none; margin-top:0.5rem;"></p>
-      <div id="aiAskAnswer" class="rich-text" style="margin-top:1rem; display:none;"></div>
     </div>
 
     <div class="card">
@@ -153,6 +152,19 @@
         </div>
       </div>
     <% }); %>
+  </div>
+
+  <div id="aiReportModal" class="quick-todo-overlay" style="display:none;">
+    <div class="quick-todo-box ai-report-box">
+      <div class="ai-report-header">
+        <p class="ai-report-question" id="aiReportQuestion"></p>
+        <button type="button" class="btn btn-small" id="aiReportCopyBtn">Copy</button>
+      </div>
+      <div id="aiReportAnswer" class="rich-text ai-report-body"></div>
+      <div class="quick-todo-actions">
+        <button type="button" class="btn btn-small" id="aiReportClose">Close</button>
+      </div>
+    </div>
   </div>
 
   <script src="/js/ai-ask.js"></script>
