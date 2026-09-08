@@ -14,11 +14,13 @@ document.addEventListener('DOMContentLoaded', function () {
   const closeBtn = document.getElementById('aiReportClose');
   const copyBtn = document.getElementById('aiReportCopyBtn');
   let lastAnswerText = '';
+  let lastAnswerHtml = '';
 
   function openModal(question, answerHtml, answerText) {
     questionEl.textContent = question;
     answerEl.innerHTML = answerHtml;
     lastAnswerText = answerText;
+    lastAnswerHtml = answerHtml;
     modal.style.display = 'flex';
   }
 
@@ -53,18 +55,36 @@ document.addEventListener('DOMContentLoaded', function () {
       return ok;
     }
 
+    function plainTextFallback() {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        return navigator.clipboard.writeText(lastAnswerText)
+          .then(function () { return true; })
+          .catch(function () { return fallbackCopy(lastAnswerText); });
+      }
+      return Promise.resolve(fallbackCopy(lastAnswerText));
+    }
+
     function showStatus(text) {
       const original = copyBtn.textContent;
       copyBtn.textContent = text;
       setTimeout(function () { copyBtn.textContent = original; }, 1500);
     }
 
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(lastAnswerText)
+    // Copy as rich text (HTML alongside a plain-text fallback) so pasting
+    // into Google Docs, Word, or Gmail keeps real bullets and paragraphs
+    // instead of literal "- " markers and line breaks.
+    if (window.ClipboardItem && navigator.clipboard && navigator.clipboard.write) {
+      const item = new ClipboardItem({
+        'text/html': new Blob([lastAnswerHtml], { type: 'text/html' }),
+        'text/plain': new Blob([lastAnswerText], { type: 'text/plain' })
+      });
+      navigator.clipboard.write([item])
         .then(function () { showStatus('Copied!'); })
-        .catch(function () { showStatus(fallbackCopy(lastAnswerText) ? 'Copied!' : 'Copy failed — select the text manually'); });
+        .catch(function () {
+          plainTextFallback().then(function (ok) { showStatus(ok ? 'Copied!' : 'Copy failed — select the text manually'); });
+        });
     } else {
-      showStatus(fallbackCopy(lastAnswerText) ? 'Copied!' : 'Copy failed — select the text manually');
+      plainTextFallback().then(function (ok) { showStatus(ok ? 'Copied!' : 'Copy failed — select the text manually'); });
     }
   });
 
