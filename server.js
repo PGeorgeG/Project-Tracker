@@ -4,6 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const os = require('os');
 const crypto = require('crypto');
+const Anthropic = require('@anthropic-ai/sdk');
 const db = require('./db');
 
 const app = express();
@@ -626,6 +627,60 @@ app.get('/report', (req, res) => {
   };
 
   res.render('report', { reportData, start, end, totals });
+});
+
+// Pulls every active project's full detail (stages, notes, todos, alerts,
+// links) as plain objects for the AI question route -- deliberately not
+// date-filtered like the report above, since a question might reasonably
+// span a project's whole history.
+function buildActiveProjectContext() {
+  const projects = db.prepare(
+    'SELECT * FROM projects WHERE archived = 0 ORDER BY sort_order ASC, created_at ASC'
+  ).all();
+
+  return projects.map(p => ({
+    name: p.name,
+    outcome: p.outcome,
+    lead: p.lead_name,
+    start_date: p.start_date,
+    end_date: p.end_date,
+    status: p.status_tag,
+    cadence: p.cadence,
+    stages: db.prepare('SELECT label, target_date, status FROM stages WHERE project_id = ? ORDER BY target_date ASC').all(p.id),
+    notes: db.prepare('SELECT meeting_date, text, tone, posted_on_timeline FROM notes WHERE project_id = ? ORDER BY meeting_date ASC').all(p.id),
+    todos: db.prepare('SELECT text, done, due_date, completed_at FROM todos WHERE project_id = ? ORDER BY created_at ASC').all(p.id),
+    alerts: db.prepare('SELECT note, trigger_date, dismissed FROM alerts WHERE project_id = ? ORDER BY trigger_date ASC').all(p.id),
+    links: db.prepare('SELECT description, url FROM links WHERE project_id = ?').all(p.id)
+  }));
+}
+
+app.post('/report/ask', async (req, res) => {
+  const question = (req.body.question || '').trim();
+  if (!question) return res.status(400).json({ error: 'Enter a question first.' });
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return res.status(500).json({ error: 'ANTHROPIC_API_KEY is not set on the server. Add it in Railway environment variables.' });
+  }
+
+  try {
+    const dataText = JSON.stringify(buildActiveProjectContext(), null, 2);
+    const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    const message = await anthropic.messages.create({
+      model: 'claude-sonnet-5',
+      max_tokens: 1500,
+      system: 'You answer questions about a team\'s active projects for "Project Tracker", ' +
+        'an internal project-tracking app. Use only the JSON project data below to answer -- ' +
+        'never invent facts that aren\'t in it. If the data doesn\'t contain enough to answer, ' +
+        'say so plainly rather than guessing. Write the answer as clear prose, with short ' +
+        'bullet points (lines starting with "- ") where a list reads better. Dates are ' +
+        'YYYY-MM-DD.\n\nPROJECT DATA:\n' + dataText,
+      messages: [{ role: 'user', content: question }]
+    });
+    const answer = message.content.filter(b => b.type === 'text').map(b => b.text).join('\n');
+    res.json({ answerHtml: renderOutcome(answer) });
+  } catch (err) {
+    console.error('AI report question failed:', err);
+    res.status(500).json({ error: 'The AI request failed. Check the server logs and API key.' });
+  }
 });
 
 // ---------- Completed todos ----------

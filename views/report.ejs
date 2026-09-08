@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Report</title>
   <link rel="stylesheet" href="/css/style.css">
+  <meta name="csrf-token" content="<%= csrfToken %>">
 </head>
 <body>
   <div class="wrap">
@@ -30,6 +31,22 @@
         </div>
       </form>
       <p class="muted" style="font-size:12px; margin-top:4px;">Defaults to the last 30 days. Select all the text below to copy it into your own report.</p>
+    </div>
+
+    <div class="card">
+      <p class="section-title">Ask AI about your projects</p>
+      <p class="muted" style="font-size:12px; margin-top:0;">Answers from your active projects' full history -- stages, notes, todos, alerts, links.</p>
+      <form id="aiAskForm" class="form-row" style="align-items:flex-end;">
+        <div class="form-group" style="flex:1;">
+          <label>Question</label>
+          <input type="text" id="aiAskInput" placeholder="e.g. Which projects are at risk right now, and why?" required>
+        </div>
+        <div class="form-group" style="flex:0;">
+          <button type="submit" class="btn btn-primary" id="aiAskBtn">Ask</button>
+        </div>
+      </form>
+      <p id="aiAskError" class="muted" style="color:var(--red); display:none; margin-top:0.5rem;"></p>
+      <div id="aiAskAnswer" class="rich-text" style="margin-top:1rem; display:none;"></div>
     </div>
 
     <div class="card">
@@ -137,5 +154,7 @@
       </div>
     <% }); %>
   </div>
+
+  <script src="/js/ai-ask.js"></script>
 </body>
 </html>
