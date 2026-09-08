@@ -626,7 +626,7 @@ app.get('/report', (req, res) => {
     openTodos: reportData.reduce((sum, p) => sum + p.carryoverTodos.length + p.newOpenTodos.length, 0)
   };
 
-  res.render('report', { reportData, start, end, totals });
+  res.render('report', { reportData, start, end, totals, aiTokensUsed: getAiTokensUsed() });
 });
 
 // Pulls every active project's full detail (stages, notes, todos, alerts,
@@ -654,6 +654,11 @@ function buildActiveProjectContext() {
   }));
 }
 
+function getAiTokensUsed() {
+  const row = db.prepare('SELECT COALESCE(SUM(input_tokens), 0) + COALESCE(SUM(output_tokens), 0) AS total FROM ai_usage').get();
+  return row.total;
+}
+
 app.post('/report/ask', async (req, res) => {
   const question = (req.body.question || '').trim();
   if (!question) return res.status(400).json({ error: 'Enter a question first.' });
@@ -676,7 +681,9 @@ app.post('/report/ask', async (req, res) => {
       messages: [{ role: 'user', content: question }]
     });
     const answer = message.content.filter(b => b.type === 'text').map(b => b.text).join('\n');
-    res.json({ answer, answerHtml: renderOutcome(answer) });
+    db.prepare('INSERT INTO ai_usage (input_tokens, output_tokens) VALUES (?, ?)')
+      .run(message.usage.input_tokens, message.usage.output_tokens);
+    res.json({ answer, answerHtml: renderOutcome(answer), totalTokensUsed: getAiTokensUsed() });
   } catch (err) {
     console.error('AI report question failed:', err);
     res.status(500).json({ error: 'The AI request failed. Check the server logs and API key.' });

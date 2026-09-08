@@ -34,8 +34,11 @@
     </div>
 
     <div class="card">
-      <p class="section-title">Ask AI about your projects</p>
-      <p class="muted" style="font-size:12px; margin-top:0;">Answers from your active projects' full history -- stages, notes, todos, alerts, links.</p>
+      <div style="display:flex; justify-content:space-between; align-items:baseline;">
+        <p class="section-title" style="margin:0;">Ask AI about your projects</p>
+        <p class="muted" style="font-size:11px; margin:0;" id="aiTokenCounter">Lifetime usage: <%= aiTokensUsed.toLocaleString() %> tokens</p>
+      </div>
+      <p class="muted" style="font-size:12px; margin-top:4px;">Answers from your active projects' full history -- stages, notes, todos, alerts, links.</p>
       <form id="aiAskForm" class="form-row" style="align-items:flex-end;">
         <div class="form-group" style="flex:1;">
           <label>Question</label>

@@ -64,3 +64,12 @@ CREATE TABLE IF NOT EXISTS links (
   url TEXT NOT NULL,
   created_at TEXT DEFAULT (datetime('now'))
 );
+
+-- Logs token usage for every AI report call, purely for cost visibility
+-- (a running counter) -- not currently used to enforce any spend limit.
+CREATE TABLE IF NOT EXISTS ai_usage (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  input_tokens INTEGER NOT NULL,
+  output_tokens INTEGER NOT NULL,
+  created_at TEXT DEFAULT (datetime('now'))
+);

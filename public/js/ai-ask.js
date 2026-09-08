@@ -109,6 +109,10 @@ document.addEventListener('DOMContentLoaded', function () {
       .then(function (result) {
         if (!result.ok) throw new Error(result.data.error || 'Something went wrong.');
         openModal(question, result.data.answerHtml, result.data.answer);
+        const counter = document.getElementById('aiTokenCounter');
+        if (counter && typeof result.data.totalTokensUsed === 'number') {
+          counter.textContent = 'Lifetime usage: ' + result.data.totalTokensUsed.toLocaleString() + ' tokens';
+        }
       })
       .catch(function (err) {
         errorEl.textContent = err.message;
