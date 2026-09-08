@@ -78,6 +78,7 @@ a:hover { text-decoration: underline; }
   align-items: center;
   justify-content: center;
   padding: 1rem;
+  overflow-y: auto;
 }
 .quick-todo-box {
   background: var(--surface);
@@ -107,6 +108,7 @@ a:hover { text-decoration: underline; }
 .ai-report-box {
   max-width: 720px;
   max-height: 82vh;
+  max-height: 82dvh; /* dvh accounts for mobile browser chrome (address bar); vh above is the fallback */
   display: flex;
   flex-direction: column;
 }
@@ -121,7 +123,7 @@ a:hover { text-decoration: underline; }
   border-bottom: 1px solid var(--border);
 }
 .ai-report-question { font-weight: 600; font-size: 14px; margin: 0; }
-.ai-report-body { overflow-y: auto; flex: 1; }
+.ai-report-body { overflow-y: auto; flex: 1; min-height: 0; }
 .quick-todo-actions {
   display: flex;
   justify-content: flex-end;

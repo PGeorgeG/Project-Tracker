@@ -35,24 +35,37 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   copyBtn.addEventListener('click', function () {
+    // iOS Safari's execCommand('copy') only works reliably with an explicit
+    // selection range, not just .select() -- and even then it can fail, so
+    // report honestly instead of always claiming success.
     function fallbackCopy(text) {
       const ta = document.createElement('textarea');
       ta.value = text;
       ta.style.position = 'fixed';
       ta.style.opacity = '0';
       document.body.appendChild(ta);
+      ta.focus();
       ta.select();
-      try { document.execCommand('copy'); } catch (e) { /* clipboard unavailable */ }
+      ta.setSelectionRange(0, ta.value.length);
+      let ok = false;
+      try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
       document.body.removeChild(ta);
+      return ok;
     }
+
+    function showStatus(text) {
+      const original = copyBtn.textContent;
+      copyBtn.textContent = text;
+      setTimeout(function () { copyBtn.textContent = original; }, 1500);
+    }
+
     if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(lastAnswerText).catch(function () { fallbackCopy(lastAnswerText); });
+      navigator.clipboard.writeText(lastAnswerText)
+        .then(function () { showStatus('Copied!'); })
+        .catch(function () { showStatus(fallbackCopy(lastAnswerText) ? 'Copied!' : 'Copy failed — select the text manually'); });
     } else {
-      fallbackCopy(lastAnswerText);
+      showStatus(fallbackCopy(lastAnswerText) ? 'Copied!' : 'Copy failed — select the text manually');
     }
-    const original = copyBtn.textContent;
-    copyBtn.textContent = 'Copied!';
-    setTimeout(function () { copyBtn.textContent = original; }, 1500);
   });
 
   form.addEventListener('submit', function (e) {
