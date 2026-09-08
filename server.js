@@ -666,7 +666,7 @@ app.post('/report/ask', async (req, res) => {
     const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
     const message = await anthropic.messages.create({
       model: 'claude-sonnet-5',
-      max_tokens: 1500,
+      max_tokens: 4096,
       system: 'You answer questions about a team\'s active projects for "Project Tracker", ' +
         'an internal project-tracking app. Use only the JSON project data below to answer -- ' +
         'never invent facts that aren\'t in it. If the data doesn\'t contain enough to answer, ' +
