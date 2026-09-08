@@ -270,10 +270,13 @@
         <% todos.forEach(function(t) { %>
           <div class="todo-row-wrap">
             <div class="todo-row">
-              <form method="POST" action="/projects/<%= project.id %>/todos/<%= t.id %>/toggle">
+              <form method="POST" action="/projects/<%= project.id %>/todos/<%= t.id %>/toggle" class="todo-toggle-form" data-done="<%= t.done %>">
                 <button type="submit" class="btn btn-small"><%= t.done ? '↺' : '✓' %></button>
               </form>
-              <span class="grow" style="<%= t.done ? 'text-decoration:line-through; color:var(--text-muted);' : '' %>"><%= t.text %></span>
+              <span class="grow">
+                <span style="<%= t.done ? 'text-decoration:line-through; color:var(--text-muted);' : '' %>"><%= t.text %></span>
+                <% if (t.done && t.comment) { %><br><span class="muted todo-comment-text">↳ <%= t.comment %></span><% } %>
+              </span>
               <% if (t.due_date) { %><span class="muted"><%= t.due_date %></span><% } %>
               <details class="stage-edit-toggle">
                 <summary class="btn btn-small">Edit</summary>
@@ -383,8 +386,22 @@
     </div>
   </div>
 
+  <div id="todoCommentModal" class="quick-todo-overlay" style="display:none;">
+    <div class="quick-todo-box">
+      <p class="quick-todo-project-name">Nice work! Add a note on how you solved it? (optional)</p>
+      <form id="todoCommentForm">
+        <textarea id="todoCommentInput" class="quick-note-textarea" style="height:120px;" placeholder="How did you solve it?"></textarea>
+        <div class="quick-todo-actions">
+          <button type="button" id="todoCommentSkip" class="btn btn-small">Skip</button>
+          <button type="submit" class="btn btn-primary btn-small">Save &amp; complete</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script src="/js/csrf.js"></script>
   <script src="/js/draft-compose.js"></script>
   <script src="/js/timeline.js"></script>
+  <script src="/js/todo-comment.js"></script>
 </body>
 </html>

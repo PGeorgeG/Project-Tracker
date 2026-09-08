@@ -104,10 +104,10 @@
                   <p class="tile-links-title">Todos</p>
                   <% p.openTodos.forEach(function(t) { %>
                     <% const urgency = todoUrgency(t.due_date); %>
-                    <form method="POST" action="/projects/<%= p.id %>/todos/<%= t.id %>/toggle" class="tile-todo-row">
+                    <form method="POST" action="/projects/<%= p.id %>/todos/<%= t.id %>/toggle" class="tile-todo-row todo-toggle-form" data-done="0">
                       <input type="hidden" name="redirect_to" value="/">
                       <label class="<%= urgency === 'overdue' ? 'todo-overdue' : (urgency === 'soon' ? 'todo-soon' : '') %>">
-                        <input type="checkbox" onchange="this.form.submit()">
+                        <input type="checkbox" onchange="this.form.requestSubmit()">
                         <span><%= t.text %><% if (t.due_date) { %> <span class="muted">— <%= t.due_date %></span><% } %></span>
                       </label>
                     </form>
@@ -145,10 +145,10 @@
           <% } %>
           <% todayListTodos.forEach(function(t) { %>
             <div class="today-list-row" data-todo-text="<%= t.text %>" data-project-name="<%= t.project_name %>">
-              <form method="POST" action="/projects/<%= t.project_id %>/todos/<%= t.id %>/toggle" style="display:inline;">
+              <form method="POST" action="/projects/<%= t.project_id %>/todos/<%= t.id %>/toggle" style="display:inline;" class="todo-toggle-form" data-done="0">
                 <input type="hidden" name="redirect_to" value="/">
                 <label>
-                  <input type="checkbox" onchange="this.form.submit()">
+                  <input type="checkbox" onchange="this.form.requestSubmit()">
                   <span><%= t.text %></span>
                 </label>
               </form>
@@ -213,10 +213,10 @@
             <% const urgency = todoUrgency(t.due_date); %>
             <% const onToday = t.today_list_date === todayStr; %>
             <div class="global-todo-row" data-type="todo" data-project-id="<%= t.project_id %>" data-todo-id="<%= t.id %>" data-on-today="<%= onToday %>">
-              <form method="POST" action="/projects/<%= t.project_id %>/todos/<%= t.id %>/toggle">
+              <form method="POST" action="/projects/<%= t.project_id %>/todos/<%= t.id %>/toggle" class="todo-toggle-form" data-done="0">
                 <input type="hidden" name="redirect_to" value="/">
                 <label class="<%= urgency === 'overdue' ? 'todo-overdue' : (urgency === 'soon' ? 'todo-soon' : '') %>">
-                  <input type="checkbox" onchange="this.form.submit()">
+                  <input type="checkbox" onchange="this.form.requestSubmit()">
                   <span class="global-todo-text"><%= t.text %></span>
                 </label>
               </form>
@@ -270,12 +270,26 @@
     </div>
   </div>
 
+  <div id="todoCommentModal" class="quick-todo-overlay" style="display:none;">
+    <div class="quick-todo-box">
+      <p class="quick-todo-project-name">Nice work! Add a note on how you solved it? (optional)</p>
+      <form id="todoCommentForm">
+        <textarea id="todoCommentInput" class="quick-note-textarea" style="height:120px;" placeholder="How did you solve it?"></textarea>
+        <div class="quick-todo-actions">
+          <button type="button" id="todoCommentSkip" class="btn btn-small">Skip</button>
+          <button type="submit" class="btn btn-primary btn-small">Save &amp; complete</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script src="/js/csrf.js"></script>
   <script src="/js/draft-compose.js"></script>
   <script src="/js/timeline.js"></script>
   <script src="/js/today-list.js"></script>
   <script src="/js/quick-todo.js"></script>
   <script src="/js/quick-note.js"></script>
+  <script src="/js/todo-comment.js"></script>
   <script src="/js/dropdown.js"></script>
 </body>
 </html>

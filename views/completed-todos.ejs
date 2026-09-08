@@ -30,6 +30,7 @@
               <span class="completed-todo-text"><%= t.text %></span>
             </label>
           </form>
+          <% if (t.comment) { %><p class="muted todo-comment-text">↳ <%= t.comment %></p><% } %>
           <div class="global-todo-meta">
             <span class="project-dot" style="background:<%= t.project_color %>;"></span>
             <a href="/projects/<%= t.project_id %>"><%= t.project_name %></a>

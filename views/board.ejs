@@ -103,6 +103,19 @@
     <button type="button" id="ctxRemoveToday">Remove from Today List</button>
   </div>
 
+  <div id="todoCommentModal" class="quick-todo-overlay" style="display:none;">
+    <div class="quick-todo-box">
+      <p class="quick-todo-project-name">Nice work! Add a note on how you solved it? (optional)</p>
+      <form id="todoCommentForm">
+        <textarea id="todoCommentInput" class="quick-note-textarea" style="height:120px;" placeholder="How did you solve it?"></textarea>
+        <div class="quick-todo-actions">
+          <button type="button" id="todoCommentSkip" class="btn btn-small">Skip</button>
+          <button type="submit" class="btn btn-primary btn-small">Save &amp; complete</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script src="/js/csrf.js"></script>
   <script src="/js/board.js"></script>
   <script src="/js/today-list.js"></script>

@@ -122,20 +122,63 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
+  // Every postit checkmark is a "mark done" (the board never shows already-
+  // done todos), so it always offers the same quick, skippable comment
+  // prompt as the dashboard/project pages -- just via fetch instead of a
+  // real form resubmit, since that's how the board already talks to the
+  // server.
+  const commentModal = document.getElementById('todoCommentModal');
+  const commentForm = document.getElementById('todoCommentForm');
+  const commentInput = document.getElementById('todoCommentInput');
+  const commentSkipBtn = document.getElementById('todoCommentSkip');
+  let pendingToggle = null; // { form, note }
+
+  function openCommentPrompt(form, note) {
+    pendingToggle = { form, note };
+    commentInput.value = '';
+    commentModal.style.display = 'flex';
+    setTimeout(function () { commentInput.focus(); }, 30);
+  }
+
+  function closeCommentPrompt() {
+    commentModal.style.display = 'none';
+    pendingToggle = null;
+  }
+
+  function completeToggle(comment) {
+    if (!pendingToggle) return;
+    const { form, note } = pendingToggle;
+    fetch(form.action, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'comment=' + encodeURIComponent(comment) + '&_csrf=' + encodeURIComponent(csrfToken)
+    }).then(function () {
+      note.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
+      note.style.opacity = '0';
+      note.style.transform += ' scale(0.85)';
+      setTimeout(function () { note.remove(); }, 200);
+    });
+  }
+
+  if (commentModal) {
+    commentSkipBtn.addEventListener('click', function () { completeToggle(''); closeCommentPrompt(); });
+    commentForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      completeToggle(commentInput.value.trim());
+      closeCommentPrompt();
+    });
+    commentModal.addEventListener('click', function (e) {
+      if (e.target === commentModal) { completeToggle(''); closeCommentPrompt(); }
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && commentModal.style.display !== 'none') { completeToggle(''); closeCommentPrompt(); }
+    });
+  }
+
   canvas.querySelectorAll('.postit-toggle-form').forEach(function (form) {
     form.addEventListener('submit', function (e) {
       e.preventDefault();
-      const note = form.closest('.postit');
-      fetch(form.action, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: '_csrf=' + encodeURIComponent(csrfToken)
-      }).then(function () {
-        note.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
-        note.style.opacity = '0';
-        note.style.transform += ' scale(0.85)';
-        setTimeout(function () { note.remove(); }, 200);
-      });
+      openCommentPrompt(form, form.closest('.postit'));
     });
   });
 });

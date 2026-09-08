@@ -422,7 +422,15 @@ app.post('/projects/:id/todos/:todoId/toggle', (req, res) => {
   const todo = db.prepare('SELECT * FROM todos WHERE id=? AND project_id=?').get(req.params.todoId, req.params.id);
   const newDone = todo.done ? 0 : 1;
   const completedAt = newDone ? new Date().toISOString() : null;
-  db.prepare('UPDATE todos SET done=?, completed_at=? WHERE id=?').run(newDone, completedAt, req.params.todoId);
+  // Only ever overwrites the comment when one is actually supplied while
+  // completing the todo -- skipping the prompt, or un-completing it, leaves
+  // any prior comment untouched rather than wiping it.
+  const comment = (req.body.comment || '').trim();
+  if (newDone && comment) {
+    db.prepare('UPDATE todos SET done=?, completed_at=?, comment=? WHERE id=?').run(newDone, completedAt, comment, req.params.todoId);
+  } else {
+    db.prepare('UPDATE todos SET done=?, completed_at=? WHERE id=?').run(newDone, completedAt, req.params.todoId);
+  }
   res.redirect((req.body && req.body.redirect_to) || ('/projects/' + req.params.id));
 });
 

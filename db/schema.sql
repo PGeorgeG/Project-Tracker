@@ -44,6 +44,7 @@ CREATE TABLE IF NOT EXISTS todos (
   source_note_id INTEGER DEFAULT NULL REFERENCES notes(id) ON DELETE SET NULL,
   board_x INTEGER DEFAULT NULL,
   board_y INTEGER DEFAULT NULL,
+  comment TEXT DEFAULT NULL,
   created_at TEXT DEFAULT (datetime('now'))
 );
 
