@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>World Clock — Project Tracker</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <meta name="csrf-token" content="<%= csrfToken %>">
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div>
+        <a href="/" style="font-size:13px;">&larr; All projects</a>
+        <h1 style="margin-top:4px;">World Clock</h1>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px;">
+        <p class="muted" style="font-size:12px; margin:0;">Pick a date, then drag the slider below to see what time it becomes everywhere on your list.</p>
+        <input type="date" id="clockDate" style="width:auto; flex-shrink:0;">
+      </div>
+
+      <div id="clockCityList" style="display:flex; flex-direction:column; margin-top:16px;"></div>
+      <p id="clockEmptyState" class="empty-state" style="display:none;">No cities yet — add your first one below.</p>
+
+      <div id="clockAddRow" style="margin-top:12px;">
+        <button type="button" class="btn btn-small" id="clockShowAddBtn">+ Add a city</button>
+      </div>
+      <div id="clockAddBox" style="display:none; background:var(--bg); border:1px solid var(--border); border-radius:var(--radius); padding:12px; margin-top:12px;">
+        <div style="display:flex; gap:6px;">
+          <input type="text" id="clockSearchInput" placeholder="Search for a city…" autocomplete="off">
+          <button type="button" class="btn btn-small" id="clockCancelAddBtn">Cancel</button>
+        </div>
+        <div id="clockSearchResults"></div>
+      </div>
+
+      <div style="position:sticky; bottom:0; background:var(--surface); border-top:1px solid var(--border); padding-top:14px; margin-top:24px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+          <p class="muted" style="font-size:11px; margin:0;">Your time: <span id="clockAnchorLabel" style="color:var(--text); font-weight:600;"></span></p>
+          <button type="button" class="btn btn-small" id="clockNowBtn" style="display:none;">↺ Now</button>
+        </div>
+        <input type="range" id="clockSlider" min="0" max="1439" step="5" style="width:100%;">
+        <div class="muted" style="display:flex; justify-content:space-between; font-size:10px; margin-top:2px;">
+          <span>12 AM</span><span>6 AM</span><span>12 PM</span><span>6 PM</span><span>12 AM</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="application/json" id="clockInitialCities"><%- safeJson(cities) %></script>
+  <script src="/js/world-clock-data.js"></script>
+  <script src="/js/csrf.js"></script>
+  <script src="/js/world-clock.js"></script>
+</body>
+</html>

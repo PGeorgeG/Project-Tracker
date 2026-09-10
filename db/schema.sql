@@ -74,3 +74,12 @@ CREATE TABLE IF NOT EXISTS ai_usage (
   output_tokens INTEGER NOT NULL,
   created_at TEXT DEFAULT (datetime('now'))
 );
+
+-- Single-row table holding the World Clock's saved city list as a JSON
+-- array -- one shared list for the whole team, same as everything else in
+-- this app (no per-user accounts).
+CREATE TABLE IF NOT EXISTS world_clock_state (
+  id INTEGER PRIMARY KEY CHECK (id = 1),
+  cities TEXT NOT NULL DEFAULT '[]',
+  updated_at TEXT DEFAULT (datetime('now'))
+);

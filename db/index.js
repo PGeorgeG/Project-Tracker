@@ -49,4 +49,6 @@ if (!alertCols.includes('today_list_date')) {
   db.exec('ALTER TABLE alerts ADD COLUMN today_list_date TEXT DEFAULT NULL');
 }
 
+db.prepare('INSERT OR IGNORE INTO world_clock_state (id, cities) VALUES (1, ?)').run('[]');
+
 module.exports = db;

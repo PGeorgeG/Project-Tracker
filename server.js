@@ -794,5 +794,26 @@ app.post('/todos/:id/position', (req, res) => {
   res.sendStatus(204);
 });
 
+// ---------- World Clock ----------
+app.get('/clock', (req, res) => {
+  const row = db.prepare('SELECT cities FROM world_clock_state WHERE id = 1').get();
+  let cities = [];
+  try { cities = JSON.parse(row.cities); } catch (e) { cities = []; }
+  res.render('clock', { cities });
+});
+
+app.post('/clock/cities', (req, res) => {
+  let cities;
+  try {
+    cities = JSON.parse(req.body.cities || '[]');
+  } catch (e) {
+    return res.status(400).json({ error: 'Invalid cities payload' });
+  }
+  if (!Array.isArray(cities)) return res.status(400).json({ error: 'Expected an array of cities' });
+  db.prepare("UPDATE world_clock_state SET cities = ?, updated_at = datetime('now') WHERE id = 1")
+    .run(JSON.stringify(cities));
+  res.json({ ok: true });
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log('Project tracker running on port ' + PORT));
